@@ -138,3 +138,31 @@ export interface PortfolioSummaryRow {
   total_value: number;
   asset_count: number;
 }
+
+// ---------- rebalancing algorithm types ----------
+
+/** ticker → price in original currency */
+export type PriceMap = Record<string, number>;
+
+/** currency pair (e.g. "USD/BRL") → conversion rate */
+export type RateMap = Record<string, number>;
+
+/** Input for L1: one asset type with its current value in BRL */
+export interface L1TypeInput {
+  type_id: string;
+  name: string;
+  target_pct: number;       // decimal 0..1 (e.g. 0.15 for 15%)
+  actual_value_brl: number; // current total value in BRL
+}
+
+/** Output from L1: distribution result per asset type */
+export interface L1Result {
+  type_id: string;
+  name: string;
+  target_pct: number;
+  desired_value: number;    // total_portfolio * target_pct
+  actual_value: number;     // current value in BRL
+  deviation: number;        // actual_value - desired_value (positive = overweight)
+  deficit: number;          // max(0, desired_value - actual_value)
+  allocated: number;        // how much of the contribution this type receives
+}
