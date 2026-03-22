@@ -166,3 +166,20 @@ export interface L1Result {
   deficit: number;          // max(0, desired_value - actual_value)
   allocated: number;        // how much of the contribution this type receives
 }
+
+/** Input for L2: one group within an asset type */
+export interface L2GroupInput {
+  group_id: string;
+  name: string;
+  type_id: string;
+  target_pct: number;       // decimal 0..1 — share within its type (e.g. 0.60 for 60%)
+}
+
+/** Output from L2: distribution result per group */
+export interface L2Result {
+  group_id: string;
+  name: string;
+  type_id: string;
+  target_pct: number;
+  allocated: number;        // how much of the type's allocation this group receives
+}
