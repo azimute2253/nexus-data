@@ -202,3 +202,47 @@ price_cache (
 3. **Staleness UI** — Dashboard MUST show `fetched_at` timestamp for prices. If any price is older than 24 hours, MUST show a warning indicator (badge or banner)
 4. **Manual refresh** — "Atualizar preços" button MUST trigger an immediate Edge Function invocation outside the cron schedule, but still respecting rate limits (debounce: max 1 manual refresh per minute)
 5. **Holiday awareness** — Cron SHOULD detect B3 holidays (Brazilian market holidays) and skip refresh. Minimum viable: hardcoded list of 2026 holidays; ideal: check via config table in Supabase
+
+---
+
+## Addendum: Story 3.6 — Auto-refresh on Portfolio Entry (2026-03-22)
+
+**Context:** Users request the dashboard to show current prices without manual refresh, but full cron automation (every 5 minutes) burns API budget unnecessarily when no one is looking at the dashboard.
+
+**Decision:** Implement **on-demand refresh triggered by portfolio page entry** with a configurable cooldown period (default 4 hours). This balances freshness with rate limit conservation.
+
+### Mechanism
+
+1. **Trigger:** When user navigates to `/dashboard/portfolio`
+2. **Check:** Query `price_refresh_log` table for last refresh timestamp
+3. **Condition:** If `(now - last_refresh) > COOLDOWN_HOURS` → trigger `/api/prices/refresh`
+4. **Log:** Insert new timestamp into `price_refresh_log`
+5. **Serve:** Return cached prices (now fresh)
+
+### Schema Addition
+
+```sql
+CREATE TABLE price_refresh_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  refreshed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  user_id UUID REFERENCES auth.users(id) -- optional: global or per-user
+);
+```
+
+### Configuration
+
+- Environment variable: `PRICE_REFRESH_COOLDOWN_HOURS` (default: 4)
+- Cooldown period applies globally (all users share last refresh timestamp)
+
+### Trade-offs
+
+| Pro | Con |
+|-----|-----|
+| Prices refresh only when needed (user viewing dashboard) | First user in 4+ hours waits ~10s for refresh |
+| Conserves API budget (no refresh when dashboard idle) | Multiple users entering < 1 min apart = duplicate refreshes (mitigated: lock mechanism) |
+| Simpler than cron (no market hours logic) | Doesn't account for market hours (may refresh at 2am) |
+| Configurable cooldown adapts to usage patterns | Requires client-side loading state during refresh |
+
+**Status:** Accepted  
+**Implementation:** Story 3.6 (Wave 6 Track F)  
+**Related:** ADR-003 (Price APIs), ADR-005 (original caching strategy)
