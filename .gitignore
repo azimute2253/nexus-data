@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local data
+data/*
+!data/.gitkeep
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets
+credentials/
+*.pem
+*.key

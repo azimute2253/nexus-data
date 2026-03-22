@@ -1,0 +1,19 @@
+{
+  "name": "nexus-data",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Conecte, organize, decida",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "Luis Kerber Adures",
+  "license": "ISC",
+  "dependencies": {
+    "papaparse": "^5.5.3"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
+}
