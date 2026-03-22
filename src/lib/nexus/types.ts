@@ -73,11 +73,22 @@ export type PriceCacheUpdate = Partial<Omit<PriceCache, 'ticker'>>;
 
 // ---------- questionnaires ----------
 
+/** Weight for Sim/Nao questions: +1 (positive signal) or -1 (negative signal). */
+export type QuestionWeight = 1 | -1;
+
+/** A single Sim/Nao question stored inside the questionnaire's JSONB column. */
+export interface QuestionnaireQuestion {
+  id: string;
+  text: string;
+  weight: QuestionWeight;
+  sort_order: number;
+}
+
 export interface Questionnaire {
   id: string;
   name: string | null;
   asset_type_id: string | null;
-  questions: unknown[];
+  questions: QuestionnaireQuestion[];
   user_id: string;
   created_at: string;
   updated_at: string;
@@ -215,4 +226,39 @@ export interface L3GroupSummary {
   spent_brl: number;        // sum of estimated_cost_brl across assets
   remainder_brl: number;    // allocated - spent (unspent due to rounding)
   assets: L3Result[];
+}
+
+// ---------- Orchestrator types (Story 4.4) ----------
+
+/** Top-level portfolio input for the rebalance() orchestrator */
+export interface PortfolioInput {
+  types: L1TypeInput[];
+  groups: L2GroupInput[];
+  assets: L3AssetInput[];
+}
+
+/** Nested result from type → group → asset level */
+export interface RebalanceTypeResult {
+  type_id: string;
+  name: string;
+  allocated: number;
+  groups: RebalanceGroupResult[];
+}
+
+export interface RebalanceGroupResult {
+  group_id: string;
+  name: string;
+  allocated: number;
+  spent: number;
+  remainder: number;
+  assets: L3Result[];
+}
+
+/** Complete rebalance output — per-asset allocations nested by type/group */
+export interface RebalanceResult {
+  contribution: number;
+  total_allocated: number;
+  total_spent: number;
+  total_remainder: number;
+  types: RebalanceTypeResult[];
 }
