@@ -262,3 +262,11 @@ export interface RebalanceResult {
   total_remainder: number;
   types: RebalanceTypeResult[];
 }
+
+// ---------- feature_flags ----------
+
+export interface FeatureFlag {
+  name: string;
+  enabled: boolean;
+  description: string | null;
+}

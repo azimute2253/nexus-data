@@ -8,6 +8,7 @@ import type {
   L1TypeInput, L1Result,
   L2GroupInput, L2Result,
   L3AssetInput, L3Result, L3GroupSummary,
+  PortfolioInput, RebalanceResult, RebalanceTypeResult, RebalanceGroupResult,
 } from './types.js';
 
 /**
@@ -312,4 +313,111 @@ export function normalizeScores(rawScores: number[]): number[] {
   }
 
   return shifted.map((v) => (v / sum) * 100);
+}
+
+// ============================================================
+// Top-Level Orchestrator — rebalance()
+//
+// Chains L1→L2→L3 and returns a nested RebalanceResult with
+// per-asset BUY orders and amounts.
+//
+// Input: portfolio data (types + groups + assets with prices)
+// Output: nested RebalanceResult with types[].groups[].assets[]
+//
+// Validates: non-empty types, valid contribution, groups exist.
+// Pure function — no side effects.
+// [Story 4.4, PRD §3 Module 2 F-002]
+// ============================================================
+
+export function rebalance(
+  portfolio: PortfolioInput,
+  contribution: number,
+): RebalanceResult {
+  // Validation
+  if (portfolio.types.length === 0) {
+    throw new Error('Portfolio must contain at least one asset type');
+  }
+
+  if (portfolio.groups.length === 0) {
+    throw new Error('Portfolio must contain at least one asset group');
+  }
+
+  // L1: distribute contribution across asset types
+  const l1Results = distributeL1(portfolio.types, contribution);
+
+  // L2: distribute type allocations across groups
+  const l2Results = distributeL2(l1Results, portfolio.groups);
+
+  // L3: distribute group allocations across individual assets
+  const l3Summaries = distributeL3(l2Results, portfolio.assets);
+
+  // Build nested result structure: types → groups → assets
+  // Index L2 results by type_id for lookup
+  const l2ByType = new Map<string, L2Result[]>();
+  for (const l2 of l2Results) {
+    const list = l2ByType.get(l2.type_id);
+    if (list) {
+      list.push(l2);
+    } else {
+      l2ByType.set(l2.type_id, [l2]);
+    }
+  }
+
+  // Index L3 summaries by group_id for lookup
+  const l3ByGroup = new Map<string, L3GroupSummary>();
+  for (const s of l3Summaries) {
+    l3ByGroup.set(s.group_id, s);
+  }
+
+  let totalSpent = 0;
+  let totalRemainder = 0;
+
+  const typeResults: RebalanceTypeResult[] = [];
+
+  for (const l1 of l1Results) {
+    const typeGroups = l2ByType.get(l1.type_id) ?? [];
+    const groupResults: RebalanceGroupResult[] = [];
+
+    for (const l2 of typeGroups) {
+      const summary = l3ByGroup.get(l2.group_id);
+      if (summary) {
+        groupResults.push({
+          group_id: l2.group_id,
+          name: l2.name,
+          allocated: l2.allocated,
+          spent: summary.spent_brl,
+          remainder: summary.remainder_brl,
+          assets: summary.assets,
+        });
+        totalSpent += summary.spent_brl;
+        totalRemainder += summary.remainder_brl;
+      } else {
+        // Group with no assets — all remainder
+        groupResults.push({
+          group_id: l2.group_id,
+          name: l2.name,
+          allocated: l2.allocated,
+          spent: 0,
+          remainder: l2.allocated,
+          assets: [],
+        });
+        totalRemainder += l2.allocated;
+      }
+    }
+
+    typeResults.push({
+      type_id: l1.type_id,
+      name: l1.name,
+      allocated: l1.allocated,
+      groups: groupResults,
+    });
+  }
+
+  return {
+    contribution,
+    total_allocated: contribution,
+    total_spent: totalSpent,
+    total_remainder: totalRemainder,
+    types: typeResults,
+  };
 }

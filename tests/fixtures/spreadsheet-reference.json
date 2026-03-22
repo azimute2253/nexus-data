@@ -1,0 +1,105 @@
+{
+  "scenarios": [
+    {
+      "id": "scenario-1",
+      "description": "Reference scenario 1: R$12,000 contribution with real portfolio data (FIIs overweight)",
+      "contribution": 12000,
+      "portfolio": {
+        "types": [
+          { "type_id": "reserva_inv", "name": "Reserva de investimento", "target_pct": 0.05, "actual_value_brl": 0.01 },
+          { "type_id": "reserva_val", "name": "Reserva de valor", "target_pct": 0.05, "actual_value_brl": 1992.80 },
+          { "type_id": "rf_br", "name": "Renda fixa BR", "target_pct": 0.10, "actual_value_brl": 12899.03 },
+          { "type_id": "fiis", "name": "FIIs", "target_pct": 0.15, "actual_value_brl": 159262.78 },
+          { "type_id": "acoes_br", "name": "Ações BR", "target_pct": 0.35, "actual_value_brl": 40480.23 },
+          { "type_id": "acoes_us", "name": "Ações US", "target_pct": 0.15, "actual_value_brl": 1816.74 },
+          { "type_id": "reits", "name": "REITs", "target_pct": 0.05, "actual_value_brl": 34087.85 },
+          { "type_id": "rf_ext", "name": "Renda fixa no exterior", "target_pct": 0.05, "actual_value_brl": 5244.00 },
+          { "type_id": "acoes_eu", "name": "Ações Europa", "target_pct": 0.03, "actual_value_brl": 0 },
+          { "type_id": "acoes_asia", "name": "Ações Asia", "target_pct": 0.02, "actual_value_brl": 0 }
+        ],
+        "groups": [
+          { "group_id": "reserva_inv_g1", "name": "Reserva Investimento", "type_id": "reserva_inv", "target_pct": 1.0 },
+          { "group_id": "reserva_val_g1", "name": "Reserva Valor", "type_id": "reserva_val", "target_pct": 1.0 },
+          { "group_id": "rf_br_g1", "name": "Renda Fixa BR", "type_id": "rf_br", "target_pct": 1.0 },
+          { "group_id": "fiis_g1", "name": "FIIs Logística", "type_id": "fiis", "target_pct": 1.0 },
+          { "group_id": "acoes_br_g1", "name": "Large Cap BR", "type_id": "acoes_br", "target_pct": 1.0 },
+          { "group_id": "acoes_us_g1", "name": "ETFs US", "type_id": "acoes_us", "target_pct": 1.0 },
+          { "group_id": "reits_g1", "name": "REITs", "type_id": "reits", "target_pct": 1.0 },
+          { "group_id": "rf_ext_g1", "name": "RF Exterior", "type_id": "rf_ext", "target_pct": 1.0 },
+          { "group_id": "acoes_eu_g1", "name": "Europa", "type_id": "acoes_eu", "target_pct": 1.0 },
+          { "group_id": "acoes_asia_g1", "name": "Asia", "type_id": "acoes_asia", "target_pct": 1.0 }
+        ],
+        "assets": [
+          { "asset_id": "romp", "ticker": "ROMP", "group_id": "reserva_inv_g1", "score": 5, "price_brl": 0.01, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "reserva_val_asset", "ticker": "OURO", "group_id": "reserva_val_g1", "score": 5, "price_brl": 330.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "ipca", "ticker": "IPCA+", "group_id": "rf_br_g1", "score": 7, "price_brl": 3102.81, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "selic", "ticker": "SELIC", "group_id": "rf_br_g1", "score": 5, "price_brl": 7803.41, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "btlg11", "ticker": "BTLG11", "group_id": "fiis_g1", "score": 4, "price_brl": 103.80, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "xplg11", "ticker": "XPLG11", "group_id": "fiis_g1", "score": 0, "price_brl": 101.66, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "hglg11", "ticker": "HGLG11", "group_id": "fiis_g1", "score": 3, "price_brl": 155.60, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "vale3", "ticker": "VALE3", "group_id": "acoes_br_g1", "score": 5, "price_brl": 77.13, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "bbas3", "ticker": "BBAS3", "group_id": "acoes_br_g1", "score": 2, "price_brl": 23.41, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "petr4", "ticker": "PETR4", "group_id": "acoes_br_g1", "score": -1, "price_brl": 47.00, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "voo", "ticker": "VOO", "group_id": "acoes_us_g1", "score": 8, "price_brl": 3200.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "qqqm", "ticker": "QQQM", "group_id": "acoes_us_g1", "score": 7, "price_brl": 1290.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "schd", "ticker": "SCHD", "group_id": "acoes_us_g1", "score": 6, "price_brl": 161.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "reit1", "ticker": "VNQ", "group_id": "reits_g1", "score": 5, "price_brl": 500.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "bnd", "ticker": "BND", "group_id": "rf_ext_g1", "score": 5, "price_brl": 387.84, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "iau", "ticker": "IAU", "group_id": "rf_ext_g1", "score": 5, "price_brl": 480.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "eu1", "ticker": "VGK", "group_id": "acoes_eu_g1", "score": 5, "price_brl": 350.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "asia1", "ticker": "VPL", "group_id": "acoes_asia_g1", "score": 5, "price_brl": 400.00, "is_active": true, "manual_override": false, "whole_shares": false }
+        ]
+      }
+    },
+    {
+      "id": "scenario-2",
+      "description": "Reference scenario 2: R$5,000 contribution with simplified 3-type portfolio",
+      "contribution": 5000,
+      "portfolio": {
+        "types": [
+          { "type_id": "acoes", "name": "Ações", "target_pct": 0.50, "actual_value_brl": 8000 },
+          { "type_id": "fiis", "name": "FIIs", "target_pct": 0.30, "actual_value_brl": 3000 },
+          { "type_id": "rf", "name": "Renda Fixa", "target_pct": 0.20, "actual_value_brl": 1000 }
+        ],
+        "groups": [
+          { "group_id": "acoes_large", "name": "Large Cap", "type_id": "acoes", "target_pct": 0.70 },
+          { "group_id": "acoes_small", "name": "Small Cap", "type_id": "acoes", "target_pct": 0.30 },
+          { "group_id": "fiis_log", "name": "Logística", "type_id": "fiis", "target_pct": 0.60 },
+          { "group_id": "fiis_papel", "name": "Papel", "type_id": "fiis", "target_pct": 0.40 },
+          { "group_id": "rf_cdb", "name": "CDB", "type_id": "rf", "target_pct": 1.0 }
+        ],
+        "assets": [
+          { "asset_id": "v3", "ticker": "VALE3", "group_id": "acoes_large", "score": 8, "price_brl": 77.13, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "p4", "ticker": "PETR4", "group_id": "acoes_large", "score": 5, "price_brl": 47.00, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "cs3", "ticker": "CSMG3", "group_id": "acoes_small", "score": 6, "price_brl": 54.20, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "bt11", "ticker": "BTLG11", "group_id": "fiis_log", "score": 4, "price_brl": 103.80, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "xp11", "ticker": "XPLG11", "group_id": "fiis_log", "score": 0, "price_brl": 101.66, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "hg11", "ticker": "HGLG11", "group_id": "fiis_papel", "score": 3, "price_brl": 155.60, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "cdb1", "ticker": "CDB-120", "group_id": "rf_cdb", "score": 5, "price_brl": 1000.00, "is_active": true, "manual_override": false, "whole_shares": false }
+        ]
+      }
+    },
+    {
+      "id": "scenario-3",
+      "description": "Reference scenario 3: R$20,000 contribution with 2-type portfolio and edge allocation",
+      "contribution": 20000,
+      "portfolio": {
+        "types": [
+          { "type_id": "acoes", "name": "Ações", "target_pct": 0.60, "actual_value_brl": 5000 },
+          { "type_id": "rf", "name": "Renda Fixa", "target_pct": 0.40, "actual_value_brl": 15000 }
+        ],
+        "groups": [
+          { "group_id": "acoes_g1", "name": "Grupo 1", "type_id": "acoes", "target_pct": 1.0 },
+          { "group_id": "rf_g1", "name": "Grupo 1", "type_id": "rf", "target_pct": 1.0 }
+        ],
+        "assets": [
+          { "asset_id": "v3", "ticker": "VALE3", "group_id": "acoes_g1", "score": 8, "price_brl": 77.13, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "b3", "ticker": "BBAS3", "group_id": "acoes_g1", "score": 5, "price_brl": 23.41, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "p4", "ticker": "PETR4", "group_id": "acoes_g1", "score": 3, "price_brl": 47.00, "is_active": true, "manual_override": false, "whole_shares": true },
+          { "asset_id": "cdb1", "ticker": "CDB-120", "group_id": "rf_g1", "score": 7, "price_brl": 1000.00, "is_active": true, "manual_override": false, "whole_shares": false },
+          { "asset_id": "lci1", "ticker": "LCI-90", "group_id": "rf_g1", "score": 5, "price_brl": 500.00, "is_active": true, "manual_override": false, "whole_shares": false }
+        ]
+      }
+    }
+  ]
+}
