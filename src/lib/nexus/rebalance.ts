@@ -4,7 +4,11 @@
 // ADR-004: 3-level cascade (L1 Type → L2 Group → L3 Asset)
 // ============================================================
 
-import type { L1TypeInput, L1Result, L2GroupInput, L2Result } from './types.js';
+import type {
+  L1TypeInput, L1Result,
+  L2GroupInput, L2Result,
+  L3AssetInput, L3Result, L3GroupSummary,
+} from './types.js';
 
 /**
  * L1 Distribution — Type-Level Rebalancing
@@ -164,6 +168,135 @@ export function distributeL2(
  * Pure function — no side effects.
  * [ADR-004 Obligation 4]
  */
+// ============================================================
+// L3 Distribution — Asset-Level Rebalancing
+//
+// Cascades L2 per-group allocations into individual assets.
+// Each asset's weight is determined by its normalized score
+// within the group. Applies FLOOR (Math.floor) for whole-share
+// assets (stocks/FIIs) and fractional for ETFs.
+//
+// Assets with is_active=false or manual_override=true are
+// excluded and receive 0 shares.
+//
+// Pure function — no side effects.
+// [ADR-004 Obligation 3, 4]
+// ============================================================
+
+export function distributeL3(
+  l2Results: L2Result[],
+  assets: L3AssetInput[],
+): L3GroupSummary[] {
+  // Index assets by group_id
+  const assetsByGroup = new Map<string, L3AssetInput[]>();
+  for (const a of assets) {
+    const list = assetsByGroup.get(a.group_id);
+    if (list) {
+      list.push(a);
+    } else {
+      assetsByGroup.set(a.group_id, [a]);
+    }
+  }
+
+  const summaries: L3GroupSummary[] = [];
+
+  for (const l2 of l2Results) {
+    const groupAssets = assetsByGroup.get(l2.group_id) ?? [];
+
+    // Filter to eligible assets (active AND not manually overridden)
+    const eligible = groupAssets.filter(
+      (a) => a.is_active && !a.manual_override,
+    );
+
+    // All assets inactive/overridden → full amount is unallocated remainder
+    if (eligible.length === 0) {
+      const results: L3Result[] = groupAssets.map((a) => ({
+        asset_id: a.asset_id,
+        ticker: a.ticker,
+        group_id: a.group_id,
+        ideal_pct: 0,
+        allocated_brl: 0,
+        shares_to_buy: 0,
+        estimated_cost_brl: 0,
+        remainder_brl: 0,
+      }));
+
+      summaries.push({
+        group_id: l2.group_id,
+        allocated_brl: l2.allocated,
+        spent_brl: 0,
+        remainder_brl: l2.allocated,
+        assets: results,
+      });
+      continue;
+    }
+
+    // Normalize scores for eligible assets
+    const rawScores = eligible.map((a) => a.score);
+    const normalizedPcts = normalizeScores(rawScores);
+
+    // Build results for eligible assets
+    const assetResults: L3Result[] = [];
+    let totalSpent = 0;
+
+    for (let i = 0; i < eligible.length; i++) {
+      const asset = eligible[i];
+      const idealPct = normalizedPcts[i];
+      const allocatedBrl = l2.allocated * (idealPct / 100);
+
+      let sharesToBuy: number;
+      if (asset.price_brl <= 0) {
+        sharesToBuy = 0;
+      } else if (asset.whole_shares) {
+        sharesToBuy = Math.floor(allocatedBrl / asset.price_brl);
+      } else {
+        sharesToBuy = allocatedBrl / asset.price_brl;
+      }
+
+      const estimatedCost = sharesToBuy * asset.price_brl;
+      const remainder = allocatedBrl - estimatedCost;
+
+      assetResults.push({
+        asset_id: asset.asset_id,
+        ticker: asset.ticker,
+        group_id: asset.group_id,
+        ideal_pct: idealPct,
+        allocated_brl: allocatedBrl,
+        shares_to_buy: sharesToBuy,
+        estimated_cost_brl: estimatedCost,
+        remainder_brl: remainder,
+      });
+
+      totalSpent += estimatedCost;
+    }
+
+    // Add excluded assets with zero allocation
+    for (const a of groupAssets) {
+      if (a.is_active && !a.manual_override) continue;
+      assetResults.push({
+        asset_id: a.asset_id,
+        ticker: a.ticker,
+        group_id: a.group_id,
+        ideal_pct: 0,
+        allocated_brl: 0,
+        shares_to_buy: 0,
+        estimated_cost_brl: 0,
+        remainder_brl: 0,
+      });
+    }
+
+    summaries.push({
+      group_id: l2.group_id,
+      allocated_brl: l2.allocated,
+      spent_brl: totalSpent,
+      remainder_brl: l2.allocated - totalSpent,
+      assets: assetResults,
+    });
+  }
+
+  return summaries;
+}
+
 export function normalizeScores(rawScores: number[]): number[] {
   if (rawScores.length === 0) return [];
   if (rawScores.length === 1) return [100];

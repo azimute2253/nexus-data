@@ -183,3 +183,36 @@ export interface L2Result {
   target_pct: number;
   allocated: number;        // how much of the type's allocation this group receives
 }
+
+/** Input for L3: one asset within a group */
+export interface L3AssetInput {
+  asset_id: string;
+  ticker: string;
+  group_id: string;
+  score: number;            // raw score from questionnaire (can be negative)
+  price_brl: number;        // current price in BRL
+  is_active: boolean;
+  manual_override: boolean;
+  whole_shares: boolean;    // true = Math.floor (stocks/FIIs), false = fractional (ETFs)
+}
+
+/** Output from L3: per-asset allocation result */
+export interface L3Result {
+  asset_id: string;
+  ticker: string;
+  group_id: string;
+  ideal_pct: number;        // normalized score as % within group (0..100)
+  allocated_brl: number;    // amount in BRL allocated to this asset
+  shares_to_buy: number;    // quantity (integer for whole_shares, fractional otherwise)
+  estimated_cost_brl: number; // shares_to_buy * price_brl
+  remainder_brl: number;    // allocated - estimated_cost (due to FLOOR rounding)
+}
+
+/** Summary of L3 distribution for a group */
+export interface L3GroupSummary {
+  group_id: string;
+  allocated_brl: number;    // total amount received from L2
+  spent_brl: number;        // sum of estimated_cost_brl across assets
+  remainder_brl: number;    // allocated - spent (unspent due to rounding)
+  assets: L3Result[];
+}
