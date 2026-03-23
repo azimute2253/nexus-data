@@ -99,11 +99,17 @@ export type QuestionnaireUpdate = Partial<Omit<Questionnaire, 'id' | 'created_at
 
 // ---------- asset_scores ----------
 
+/** A single Sim/Nao answer stored in the asset_scores JSONB column. */
+export interface ScoreAnswer {
+  question_id: string;
+  value: boolean;   // true = Sim, false = Nao
+}
+
 export interface AssetScore {
   id: string;
   asset_id: string;
   questionnaire_id: string;
-  answers: unknown[];
+  answers: ScoreAnswer[];
   total_score: number;
   user_id: string;
   created_at: string;
@@ -270,3 +276,16 @@ export interface FeatureFlag {
   enabled: boolean;
   description: string | null;
 }
+
+// ---------- price_refresh_log ----------
+
+export type PriceRefreshTrigger = 'manual' | 'auto';
+
+export interface PriceRefreshLog {
+  id: string;
+  refreshed_at: string;
+  trigger: PriceRefreshTrigger;
+  user_id: string | null;
+}
+
+export type PriceRefreshLogInsert = Omit<PriceRefreshLog, 'id'>;
