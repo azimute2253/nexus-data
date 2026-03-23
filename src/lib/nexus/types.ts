@@ -49,6 +49,8 @@ export interface Asset {
   is_active: boolean;
   manual_override: boolean;
   whole_shares: boolean;
+  bought: boolean;
+  sold: boolean;
   user_id: string;
   created_at: string;
   updated_at: string;

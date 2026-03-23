@@ -69,6 +69,10 @@ export async function createAsset(
     );
   }
 
+  if (input.bought === true && input.sold === true) {
+    throw new Error('Asset cannot be both bought and sold');
+  }
+
   const { data, error } = await getAnonClient()
     .from(TABLE)
     .insert(input)
@@ -108,6 +112,10 @@ export async function updateAsset(
     throw new Error(
       `Invalid price_source: must be one of ${VALID_PRICE_SOURCES.join(', ')}`,
     );
+  }
+
+  if (updates.bought === true && updates.sold === true) {
+    throw new Error('Asset cannot be both bought and sold');
   }
 
   const { data, error } = await getAnonClient()

@@ -67,6 +67,8 @@ function makeAsset(overrides: Partial<Asset> = {}): Asset {
     is_active: true,
     manual_override: false,
     whole_shares: true,
+    bought: false,
+    sold: false,
     user_id: USER_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
@@ -131,6 +133,21 @@ describe('getAssets', () => {
     expect(result).toEqual([]);
   });
 
+  it('T6.4.7 — returns bought/sold flags in asset data', async () => {
+    const assets = [
+      makeAsset({ ticker: 'VALE3', bought: true, sold: false }),
+      makeAsset({ ticker: 'PETR4', id: '55555555-5555-5555-5555-555555555555', bought: false, sold: true }),
+    ];
+
+    queryBuilder.order.mockReturnValueOnce({ data: assets, error: null });
+
+    const result = await getAssets();
+    expect(result[0].bought).toBe(true);
+    expect(result[0].sold).toBe(false);
+    expect(result[1].bought).toBe(false);
+    expect(result[1].sold).toBe(true);
+  });
+
   it('throws on Supabase error', async () => {
     const err = { message: 'connection error', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
@@ -182,6 +199,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
     const created = makeAsset({
@@ -212,6 +231,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
     const created = makeAsset({ ticker: 'PETR4', quantity: 0 });
@@ -233,6 +254,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
 
@@ -250,6 +273,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
 
@@ -267,6 +292,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
 
@@ -284,6 +311,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
 
@@ -301,6 +330,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
 
@@ -318,6 +349,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
     const err = { message: 'duplicate key value violates unique constraint "assets_ticker_user_unique"', code: '23505' };
@@ -325,6 +358,27 @@ describe('createAsset', () => {
     queryBuilder.single.mockReturnValueOnce({ data: null, error: err });
 
     await expect(createAsset(input)).rejects.toEqual(err);
+  });
+
+  it('T6.4.6 — rejects createAsset with bought=true and sold=true', async () => {
+    const input: AssetInsert = {
+      ticker: 'VALE3',
+      name: null,
+      sector: null,
+      quantity: 10,
+      group_id: GROUP_ID,
+      price_source: 'brapi',
+      is_active: true,
+      manual_override: false,
+      whole_shares: true,
+      bought: true,
+      sold: true,
+      user_id: USER_ID,
+    };
+
+    await expect(createAsset(input)).rejects.toThrow(
+      'Asset cannot be both bought and sold',
+    );
   });
 
   it('throws on Supabase error (e.g. invalid FK group_id)', async () => {
@@ -338,6 +392,8 @@ describe('createAsset', () => {
       is_active: true,
       manual_override: false,
       whole_shares: true,
+      bought: false,
+      sold: false,
       user_id: USER_ID,
     };
     const err = { message: 'foreign key constraint', code: '23503' };
@@ -408,6 +464,54 @@ describe('updateAsset', () => {
 
     const result = await updateAsset(updated.id, { is_active: false });
     expect(result.is_active).toBe(false);
+  });
+
+  // ---------- bought/sold flags (Story 6.4) ----------
+
+  it('T6.4.1 — sets bought flag to true', async () => {
+    const updated = makeAsset({ bought: true });
+
+    queryBuilder.single.mockReturnValueOnce({ data: updated, error: null });
+
+    const result = await updateAsset(updated.id, { bought: true });
+    expect(result.bought).toBe(true);
+    expect(result.sold).toBe(false);
+  });
+
+  it('T6.4.2 — sets sold flag to true', async () => {
+    const updated = makeAsset({ sold: true });
+
+    queryBuilder.single.mockReturnValueOnce({ data: updated, error: null });
+
+    const result = await updateAsset(updated.id, { sold: true });
+    expect(result.sold).toBe(true);
+    expect(result.bought).toBe(false);
+  });
+
+  it('T6.4.3 — rejects bought=true and sold=true simultaneously', async () => {
+    await expect(
+      updateAsset('any-id', { bought: true, sold: true }),
+    ).rejects.toThrow('Asset cannot be both bought and sold');
+  });
+
+  it('T6.4.4 — allows resetting both flags to false', async () => {
+    const updated = makeAsset({ bought: false, sold: false });
+
+    queryBuilder.single.mockReturnValueOnce({ data: updated, error: null });
+
+    const result = await updateAsset(updated.id, { bought: false, sold: false });
+    expect(result.bought).toBe(false);
+    expect(result.sold).toBe(false);
+  });
+
+  it('T6.4.5 — allows bought=true with sold=false', async () => {
+    const updated = makeAsset({ bought: true, sold: false });
+
+    queryBuilder.single.mockReturnValueOnce({ data: updated, error: null });
+
+    const result = await updateAsset(updated.id, { bought: true, sold: false });
+    expect(result.bought).toBe(true);
+    expect(result.sold).toBe(false);
   });
 
   it('updates multiple fields at once', async () => {
