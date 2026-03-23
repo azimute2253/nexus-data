@@ -10,15 +10,6 @@
   "keywords": [],
   "author": "Luis Kerber Adures",
   "license": "ISC",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.99.3",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "papaparse": "^5.5.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "recharts": "^3.8.0"
-  },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -26,5 +17,22 @@
     "jsdom": "^29.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
+  },
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0"
   }
 }

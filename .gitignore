@@ -42,3 +42,4 @@ data/*
 credentials/
 *.pem
 *.key
+.vercel
