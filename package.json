@@ -11,9 +11,20 @@
   "author": "Luis Kerber Adures",
   "license": "ISC",
   "dependencies": {
-    "papaparse": "^5.5.3"
+    "@supabase/supabase-js": "^2.99.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "papaparse": "^5.5.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.5.0",
+    "jsdom": "^29.0.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   }
 }

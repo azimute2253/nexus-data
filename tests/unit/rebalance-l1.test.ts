@@ -167,6 +167,35 @@ describe('T4.1.5 — Deterministic (same inputs = same outputs)', () => {
 // Edge cases
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Runtime validation — negative input guards (Story 4.1 fix)
+// ---------------------------------------------------------------------------
+
+describe('Runtime validation — negative inputs', () => {
+  it('throws on negative contribution', () => {
+    const types: L1TypeInput[] = [
+      makeType({ type_id: 'a', target_pct: 0.5, actual_value_brl: 1_000 }),
+    ];
+    expect(() => distributeL1(types, -500)).toThrow(
+      'Contribution must not be negative: -500',
+    );
+  });
+
+  it('throws on negative actual_value_brl', () => {
+    const types: L1TypeInput[] = [
+      makeType({ type_id: 'ok', target_pct: 0.5, actual_value_brl: 1_000 }),
+      makeType({ type_id: 'bad', name: 'Bad Asset', target_pct: 0.5, actual_value_brl: -200 }),
+    ];
+    expect(() => distributeL1(types, 1_000)).toThrow(
+      'Asset "Bad Asset" (bad) has negative actual_value_brl: -200',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Edge cases
+// ---------------------------------------------------------------------------
+
 describe('Edge cases', () => {
   it('AC6: empty portfolio returns empty array', () => {
     const results = distributeL1([], 12_000);
