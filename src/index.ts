@@ -57,7 +57,7 @@ export { OrderBottomSheet } from './components/mobile/OrderBottomSheet';
 export type { OrderBottomSheetProps } from './components/mobile/OrderBottomSheet';
 
 // === Supabase Client ===
-export { supabase } from './lib/supabase';
+export { initSupabase, getAnonClient, getServiceClient } from './lib/supabase';
 
 // === Feature Flags ===
 export { getFeatureFlag } from './lib/feature-flags/client';

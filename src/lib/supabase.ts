@@ -8,27 +8,28 @@ import { createBrowserClient } from "@supabase/ssr";
 
 // --------------- environment helpers ---------------
 
-// Explicit mapping from env var name to window global key
-const WINDOW_GLOBALS: Record<string, string> = {
-  PUBLIC_SUPABASE_URL: '__NEXUS_SUPABASE_URL__',
-  PUBLIC_SUPABASE_ANON_KEY: '__NEXUS_SUPABASE_ANON_KEY__',
-};
-
 function requireEnv(name: string): string {
-  // Browser: check window globals injected by NexusApp (via supabaseUrl/supabaseAnonKey props)
-  if (typeof window !== 'undefined') {
-    const windowKey = WINDOW_GLOBALS[name];
-    if (windowKey) {
-      const value = (window as Record<string, string>)[windowKey];
-      if (value) return value;
-    }
-  }
-  // Node.js / SSR: process.env
   const value = (typeof process !== 'undefined' && process.env) ? process.env[name] : undefined;
   if (!value) {
     throw new Error(`Missing environment variable: ${name}`);
   }
   return value;
+}
+
+// --------------- explicit init (browser) ---------------
+
+let _initUrl: string | null = null;
+let _initKey: string | null = null;
+
+/**
+ * Initialize Supabase credentials for browser usage.
+ * Call before any getAnonClient() in browser context.
+ */
+export function initSupabase(url: string, anonKey: string): void {
+  _initUrl = url.trim();
+  _initKey = anonKey.trim();
+  // Reset cached client so next getAnonClient() uses new credentials
+  _anonClient = null;
 }
 
 // --------------- server client (service role) ---------------
@@ -59,14 +60,13 @@ let _anonClient: SupabaseClient | null = null;
 /**
  * Returns a Supabase client authenticated with the **anon** key.
  * Browser: uses @supabase/ssr createBrowserClient to read auth cookies.
- * Node/SSR: plain createClient.
+ * Node/SSR: plain createClient with process.env.
  */
 export function getAnonClient(): SupabaseClient {
   if (!_anonClient) {
-    const url = requireEnv("PUBLIC_SUPABASE_URL");
-    const key = requireEnv("PUBLIC_SUPABASE_ANON_KEY");
+    const url = _initUrl || requireEnv("PUBLIC_SUPABASE_URL");
+    const key = _initKey || requireEnv("PUBLIC_SUPABASE_ANON_KEY");
     if (typeof window !== 'undefined') {
-      // Browser: createBrowserClient reads session from cookies automatically
       _anonClient = createBrowserClient(url, key);
     } else {
       _anonClient = createClient(url, key);

@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import type { Wallet } from '../../lib/nexus/types.js';
 import { getWallets } from '../../lib/nexus/wallets.js';
+import { initSupabase } from '../../lib/supabase.js';
 import { NEXUS_ACTIVE_WALLET_KEY } from '../../lib/nexus/constants.js';
 import { OnboardingScreen } from './OnboardingScreen.js';
 import { WalletSelector } from './WalletSelector.js';
@@ -39,10 +40,9 @@ function readStoredWalletId(): string | null {
 // ---------- Component ----------
 
 export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: NexusAppProps) {
-  // Bootstrap Supabase client if credentials provided (browser-safe)
-  if (supabaseUrl && supabaseAnonKey && typeof window !== 'undefined') {
-    (window as Record<string, unknown>).__NEXUS_SUPABASE_URL__ = supabaseUrl;
-    (window as Record<string, unknown>).__NEXUS_SUPABASE_ANON_KEY__ = supabaseAnonKey;
+  // Initialize Supabase client with credentials from host app
+  if (supabaseUrl && supabaseAnonKey) {
+    initSupabase(supabaseUrl, supabaseAnonKey);
   }
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [activeWalletId, setActiveWalletId] = useState<string | null>(null);
