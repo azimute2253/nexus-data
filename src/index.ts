@@ -34,6 +34,12 @@ export type { PriceRefreshButtonProps } from './components/nexus/PriceRefreshBut
 export { WalletSelector } from './components/nexus/WalletSelector';
 export type { WalletSelectorProps } from './components/nexus/WalletSelector';
 
+export { WalletManagement } from './components/nexus/WalletManagement';
+export type { WalletManagementProps } from './components/nexus/WalletManagement';
+
+export { ConfirmDialog } from './components/nexus/ConfirmDialog';
+export type { ConfirmDialogProps } from './components/nexus/ConfirmDialog';
+
 // === Mobile Components ===
 export { MobileRebalance } from './components/mobile/MobileRebalance';
 export type { MobileRebalanceProps } from './components/mobile/MobileRebalance';
@@ -66,3 +72,9 @@ export * from './lib/nexus/wallets';
 export * from './lib/nexus/rebalance';
 export * from './lib/nexus/data';
 export { DualWeightPanel } from './components/nexus/DualWeightPanel';
+
+export { OnboardingScreen } from './components/nexus/OnboardingScreen';
+export type { OnboardingScreenProps } from './components/nexus/OnboardingScreen';
+
+export { EmptyDashboard } from './components/nexus/EmptyDashboard';
+export type { EmptyDashboardProps } from './components/nexus/EmptyDashboard';
