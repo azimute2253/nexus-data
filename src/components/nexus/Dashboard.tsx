@@ -67,7 +67,7 @@ function PortfolioHeader({ totalValueBrl }: { totalValueBrl: number }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
       <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-        Valor Total do Portfólio
+        Valor Total — Nexus Data
       </p>
       <p className="mt-1 text-2xl font-bold text-gray-900 md:text-3xl">
         {formatBrl(totalValueBrl)}
