@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { TABS } from '../../src/components/nexus/TabNavigation.js';
 import type { TabId, TabDef } from '../../src/components/nexus/TabNavigation.js';
 
-// ── Tests: Tab configuration (AC1) ─────────────────────────
+// ── Tests: Tab configuration (AC1, T13.1.1) ────────────────
 
 describe('TABS configuration', () => {
-  it('T8.3.1 — defines exactly 3 tabs', () => {
+  it('T13.1.1 — defines exactly 3 tabs', () => {
     expect(TABS).toHaveLength(3);
   });
 
-  it('T8.3.1 — contains Overview, Detalhes, Rebalancear tabs', () => {
+  it('T13.1.1 — contains Dashboard, Aportes, Ativos tabs', () => {
     const labels = TABS.map((t) => t.label);
-    expect(labels).toEqual(['Overview', 'Detalhes', 'Rebalancear']);
+    expect(labels).toEqual(['Dashboard', 'Aportes', 'Ativos']);
   });
 
   it('has unique tab IDs', () => {
@@ -19,7 +19,7 @@ describe('TABS configuration', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('T8.3.2 — each tab has an icon', () => {
+  it('each tab has an icon', () => {
     for (const tab of TABS) {
       expect(tab.icon).toBeTruthy();
     }
@@ -27,7 +27,7 @@ describe('TABS configuration', () => {
 
   it('tab IDs match expected values', () => {
     const ids = TABS.map((t) => t.id);
-    expect(ids).toEqual(['overview', 'detalhes', 'rebalancear']);
+    expect(ids).toEqual(['dashboard', 'aportes', 'ativos']);
   });
 });
 
@@ -35,7 +35,7 @@ describe('TABS configuration', () => {
 
 describe('TabId type', () => {
   it('TABS ids are valid TabId values', () => {
-    const validIds: TabId[] = ['overview', 'detalhes', 'rebalancear'];
+    const validIds: TabId[] = ['dashboard', 'aportes', 'ativos'];
     for (const tab of TABS) {
       expect(validIds).toContain(tab.id);
     }

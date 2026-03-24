@@ -1,16 +1,17 @@
 // ============================================================
 // Nexus Data — Tab Navigation Component
 // Bottom tabs on mobile, horizontal header tabs on desktop.
-// 3 tabs: Overview | Detalhes | Rebalancear.
+// 3 tabs: Dashboard | Aportes | Ativos.
 // Active tab has visual indicator; error boundary per section.
-// [Story 8.3, ADR-006]
+// Tab state synced to URL query param (?tab=) for deep-linking.
+// [Story 8.3, Story 13.1, ADR-006, ADR-013]
 // ============================================================
 
 import { Component, useState, useCallback, type ReactNode } from 'react';
 
 // ---------- Tab definitions ----------
 
-export type TabId = 'overview' | 'detalhes' | 'rebalancear';
+export type TabId = 'dashboard' | 'aportes' | 'ativos';
 
 export interface TabDef {
   id: TabId;
@@ -18,9 +19,33 @@ export interface TabDef {
   icon: ReactNode;
 }
 
+// ---------- URL tab state helpers ----------
+
+const TAB_PARAM = 'tab';
+const DEFAULT_TAB: TabId = 'dashboard';
+const VALID_TABS: ReadonlySet<string> = new Set<TabId>(['dashboard', 'aportes', 'ativos']);
+
+function getTabFromUrl(): TabId {
+  if (typeof window === 'undefined') return DEFAULT_TAB;
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get(TAB_PARAM);
+  return raw && VALID_TABS.has(raw) ? (raw as TabId) : DEFAULT_TAB;
+}
+
+function setTabInUrl(tab: TabId): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  if (tab === DEFAULT_TAB) {
+    url.searchParams.delete(TAB_PARAM);
+  } else {
+    url.searchParams.set(TAB_PARAM, tab);
+  }
+  history.replaceState(null, '', url.toString());
+}
+
 // ---------- SVG Icons (inline, no external deps) ----------
 
-function IconOverview({ className }: { className?: string }) {
+function IconDashboard({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -31,7 +56,17 @@ function IconOverview({ className }: { className?: string }) {
   );
 }
 
-function IconDetalhes({ className }: { className?: string }) {
+function IconAportes({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="12" y1="20" x2="12" y2="10" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="16" />
+    </svg>
+  );
+}
+
+function IconAtivos({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <line x1="8" y1="6" x2="21" y2="6" />
@@ -44,31 +79,19 @@ function IconDetalhes({ className }: { className?: string }) {
   );
 }
 
-function IconRebalancear({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="20" x2="12" y2="10" />
-      <line x1="18" y1="20" x2="18" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="16" />
-    </svg>
-  );
-}
-
 // ---------- Tab config ----------
 
 export const TABS: TabDef[] = [
-  { id: 'overview', label: 'Overview', icon: <IconOverview className="h-5 w-5" /> },
-  { id: 'detalhes', label: 'Detalhes', icon: <IconDetalhes className="h-5 w-5" /> },
-  { id: 'rebalancear', label: 'Rebalancear', icon: <IconRebalancear className="h-5 w-5" /> },
+  { id: 'dashboard', label: 'Dashboard', icon: <IconDashboard className="h-5 w-5" /> },
+  { id: 'aportes', label: 'Aportes', icon: <IconAportes className="h-5 w-5" /> },
+  { id: 'ativos', label: 'Ativos', icon: <IconAtivos className="h-5 w-5" /> },
 ];
 
 // ---------- Props ----------
 
 export interface TabNavigationProps {
-  /** Currently active tab (controlled mode) */
+  /** Currently active tab (controlled mode — overrides URL state) */
   activeTab?: TabId;
-  /** Default tab when uncontrolled */
-  defaultTab?: TabId;
   /** Callback when tab changes */
   onTabChange?: (tab: TabId) => void;
   /** Content render function per tab */
@@ -123,11 +146,10 @@ export class TabErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
 
 export function TabNavigation({
   activeTab: controlledTab,
-  defaultTab = 'overview',
   onTabChange,
   children,
 }: TabNavigationProps) {
-  const [internalTab, setInternalTab] = useState<TabId>(defaultTab);
+  const [internalTab, setInternalTab] = useState<TabId>(getTabFromUrl);
 
   const activeTab = controlledTab ?? internalTab;
 
@@ -136,6 +158,7 @@ export function TabNavigation({
       if (controlledTab === undefined) {
         setInternalTab(tab);
       }
+      setTabInUrl(tab);
       onTabChange?.(tab);
     },
     [controlledTab, onTabChange],

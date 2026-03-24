@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import {
@@ -11,70 +11,77 @@ import {
 
 afterEach(() => {
   cleanup();
+  // Reset URL after each test
+  window.history.replaceState(null, '', window.location.pathname);
 });
 
-// ── Component rendering (AC1) ──────────────────────────────
+// ── Helper: set URL query param before render ───────────────
+
+function setUrlTab(tab: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('tab', tab);
+  window.history.replaceState(null, '', url.toString());
+}
+
+// ── Component rendering (AC1, T13.1.1) ─────────────────────
 
 describe('TabNavigation — rendering', () => {
-  it('T8.3.1 — renders all 3 tab buttons', () => {
+  it('T13.1.1 — renders all 3 tab buttons: Dashboard, Aportes, Ativos', () => {
     render(
       <TabNavigation>
         {(tab: TabId) => <div>Content: {tab}</div>}
       </TabNavigation>,
     );
 
-    // Desktop + mobile tab bars both render, so each label appears twice (6 total)
     for (const tab of TABS) {
       const buttons = screen.getAllByRole('tab', { name: new RegExp(tab.label) });
       expect(buttons.length).toBeGreaterThanOrEqual(1);
     }
   });
 
-  it('renders default tab content on mount', () => {
+  it('T13.1.4 — renders Dashboard content by default (no query param)', () => {
     render(
-      <TabNavigation defaultTab="overview">
+      <TabNavigation>
         {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
       </TabNavigation>,
     );
 
-    expect(screen.getByTestId('content')).toHaveTextContent('Active: overview');
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: dashboard');
   });
 
   it('renders controlled tab content', () => {
     render(
-      <TabNavigation activeTab="rebalancear">
+      <TabNavigation activeTab="ativos">
         {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
       </TabNavigation>,
     );
 
-    expect(screen.getByTestId('content')).toHaveTextContent('Active: rebalancear');
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: ativos');
   });
 });
 
-// ── Tab switching (AC2) ─────────────────────────────────────
+// ── Tab switching (AC2, AC3, T13.1.2) ──────────────────────
 
 describe('TabNavigation — tab switching', () => {
-  it('T8.3.2 — clicking a tab triggers onTabChange with correct TabId', () => {
-    const onTabChange = vi.fn();
-
+  it('T13.1.2 — clicking Aportes tab shows Aportes content and updates URL', () => {
     render(
-      <TabNavigation activeTab="overview" onTabChange={onTabChange}>
-        {(tab: TabId) => <div>Content: {tab}</div>}
+      <TabNavigation>
+        {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
       </TabNavigation>,
     );
 
-    const rebalancearButtons = screen.getAllByRole('tab', { name: /Rebalancear/ });
-    fireEvent.click(rebalancearButtons[0]);
+    const aportesButtons = screen.getAllByRole('tab', { name: /Aportes/ });
+    fireEvent.click(aportesButtons[0]);
 
-    expect(onTabChange).toHaveBeenCalledTimes(1);
-    expect(onTabChange).toHaveBeenCalledWith('rebalancear');
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: aportes');
+    expect(window.location.search).toContain('tab=aportes');
   });
 
   it('clicking each tab fires onTabChange with its id', () => {
     const onTabChange = vi.fn();
 
     render(
-      <TabNavigation activeTab="overview" onTabChange={onTabChange}>
+      <TabNavigation activeTab="dashboard" onTabChange={onTabChange}>
         {(tab: TabId) => <div>Content: {tab}</div>}
       </TabNavigation>,
     );
@@ -85,57 +92,154 @@ describe('TabNavigation — tab switching', () => {
     }
 
     expect(onTabChange).toHaveBeenCalledTimes(3);
-    expect(onTabChange).toHaveBeenNthCalledWith(1, 'overview');
-    expect(onTabChange).toHaveBeenNthCalledWith(2, 'detalhes');
-    expect(onTabChange).toHaveBeenNthCalledWith(3, 'rebalancear');
+    expect(onTabChange).toHaveBeenNthCalledWith(1, 'dashboard');
+    expect(onTabChange).toHaveBeenNthCalledWith(2, 'aportes');
+    expect(onTabChange).toHaveBeenNthCalledWith(3, 'ativos');
   });
 
   it('uncontrolled mode updates content on tab click', () => {
     render(
-      <TabNavigation defaultTab="overview">
+      <TabNavigation>
         {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
       </TabNavigation>,
     );
 
-    expect(screen.getByTestId('content')).toHaveTextContent('Active: overview');
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: dashboard');
 
-    const detalhesButtons = screen.getAllByRole('tab', { name: /Detalhes/ });
-    fireEvent.click(detalhesButtons[0]);
+    const ativosButtons = screen.getAllByRole('tab', { name: /Ativos/ });
+    fireEvent.click(ativosButtons[0]);
 
-    expect(screen.getByTestId('content')).toHaveTextContent('Active: detalhes');
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: ativos');
+  });
+});
+
+// ── URL deep-linking (AC5, AC6, T13.1.3) ───────────────────
+
+describe('TabNavigation — URL deep-linking', () => {
+  it('T13.1.3 — loads with ?tab=ativos → Ativos tab active', () => {
+    setUrlTab('ativos');
+
+    render(
+      <TabNavigation>
+        {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
+      </TabNavigation>,
+    );
+
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: ativos');
+  });
+
+  it('loads with ?tab=aportes → Aportes tab active', () => {
+    setUrlTab('aportes');
+
+    render(
+      <TabNavigation>
+        {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
+      </TabNavigation>,
+    );
+
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: aportes');
+  });
+
+  it('loads with invalid ?tab=xyz → falls back to Dashboard', () => {
+    setUrlTab('xyz');
+
+    render(
+      <TabNavigation>
+        {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
+      </TabNavigation>,
+    );
+
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: dashboard');
+  });
+
+  it('switching to Dashboard removes tab param from URL', () => {
+    setUrlTab('aportes');
+
+    render(
+      <TabNavigation>
+        {(tab: TabId) => <div data-testid="content">Active: {tab}</div>}
+      </TabNavigation>,
+    );
+
+    const dashboardButtons = screen.getAllByRole('tab', { name: /Dashboard/ });
+    fireEvent.click(dashboardButtons[0]);
+
+    expect(window.location.search).not.toContain('tab=');
+  });
+});
+
+// ── Tab caching behavior (AC7, T13.1.5) ────────────────────
+
+describe('TabNavigation — cache behavior', () => {
+  it('T13.1.5 — switching tabs does not remount (render function called, no re-fetch)', () => {
+    const renderFn = vi.fn((tab: TabId) => (
+      <div data-testid="content">Active: {tab}</div>
+    ));
+
+    render(<TabNavigation>{renderFn}</TabNavigation>);
+
+    const initialCallCount = renderFn.mock.calls.length;
+
+    const aportesButtons = screen.getAllByRole('tab', { name: /Aportes/ });
+    fireEvent.click(aportesButtons[0]);
+
+    // Render function called again with new tab (no full remount/re-fetch)
+    expect(renderFn.mock.calls.length).toBeGreaterThan(initialCallCount);
+    expect(screen.getByTestId('content')).toHaveTextContent('Active: aportes');
+  });
+});
+
+// ── Mobile touch targets (AC8, T13.1.6) ────────────────────
+
+describe('TabNavigation — mobile touch targets', () => {
+  it('T13.1.6 — mobile tab buttons have min-height >= 44px', () => {
+    render(
+      <TabNavigation>
+        {(tab: TabId) => <div>Content: {tab}</div>}
+      </TabNavigation>,
+    );
+
+    // Mobile tabs use min-h-[56px] class (56px > 44px requirement)
+    const mobileTabs = TABS.map((t) =>
+      document.getElementById(`tab-mobile-${t.id}`),
+    ).filter(Boolean);
+
+    expect(mobileTabs.length).toBe(3);
+    for (const btn of mobileTabs) {
+      expect(btn!.className).toContain('min-h-[56px]');
+    }
   });
 });
 
 // ── Active indicator (AC3) ──────────────────────────────────
 
 describe('TabNavigation — active indicator', () => {
-  it('T8.3.3 — active tab has aria-selected="true"', () => {
+  it('active tab has aria-selected="true"', () => {
     render(
-      <TabNavigation activeTab="detalhes">
+      <TabNavigation activeTab="aportes">
         {(tab: TabId) => <div>Content: {tab}</div>}
       </TabNavigation>,
     );
 
     const allTabs = screen.getAllByRole('tab');
-    const detalhesTabs = allTabs.filter((el) => el.textContent?.includes('Detalhes'));
+    const aportesTabs = allTabs.filter((el) => el.textContent?.includes('Aportes'));
 
-    // At least one tab button for Detalhes with aria-selected="true"
-    expect(detalhesTabs.length).toBeGreaterThanOrEqual(1);
-    for (const tab of detalhesTabs) {
+    expect(aportesTabs.length).toBeGreaterThanOrEqual(1);
+    for (const tab of aportesTabs) {
       expect(tab).toHaveAttribute('aria-selected', 'true');
     }
   });
 
   it('inactive tabs have aria-selected="false"', () => {
     render(
-      <TabNavigation activeTab="overview">
+      <TabNavigation activeTab="dashboard">
         {(tab: TabId) => <div>Content: {tab}</div>}
       </TabNavigation>,
     );
 
     const allTabs = screen.getAllByRole('tab');
     const inactiveTabs = allTabs.filter(
-      (el) => !el.textContent?.includes('Overview'),
+      (el) => !el.textContent?.includes('Dashboard'),
     );
 
     expect(inactiveTabs.length).toBeGreaterThanOrEqual(1);
@@ -145,14 +249,14 @@ describe('TabNavigation — active indicator', () => {
   });
 });
 
-// ── Error boundary (AC4, T8.3.5) ────────────────────────────
+// ── Error boundary (T8.3.5) ────────────────────────────────
 
 function ThrowingChild(): never {
   throw new Error('Component render error');
 }
 
 describe('TabErrorBoundary', () => {
-  it('T8.3.5 — displays fallback "Falha ao carregar seção" when child throws', () => {
+  it('displays fallback when child throws', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
@@ -188,7 +292,7 @@ describe('TabNavigation — error boundary integration', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
-      <TabNavigation activeTab="overview">
+      <TabNavigation activeTab="dashboard">
         {() => <ThrowingChild />}
       </TabNavigation>,
     );
