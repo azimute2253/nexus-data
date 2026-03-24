@@ -87,7 +87,10 @@ const BASE_ASSET: Asset = {
   whole_shares: true,
   bought: false,
   sold: false,
+  weight_mode: 'questionnaire',
+  manual_weight: 0,
   user_id: 'u1',
+  wallet_id: 'w1',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 };

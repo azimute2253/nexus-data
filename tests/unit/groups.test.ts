@@ -102,10 +102,11 @@ describe('getGroups', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: groups, error: null });
 
-    const result = await getGroups();
+    const result = await getGroups(WALLET_ID);
 
     expect(queryBuilder.from).toHaveBeenCalledWith('asset_groups');
     expect(queryBuilder.select).toHaveBeenCalledWith('*');
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.order).toHaveBeenCalledWith('name', { ascending: true });
     expect(result).toEqual(groups);
   });
@@ -115,8 +116,9 @@ describe('getGroups', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: groups, error: null });
 
-    const result = await getGroups(TYPE_ID);
+    const result = await getGroups(WALLET_ID, TYPE_ID);
 
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.eq).toHaveBeenCalledWith('type_id', TYPE_ID);
     expect(result).toEqual(groups);
   });
@@ -124,7 +126,7 @@ describe('getGroups', () => {
   it('returns empty array when no groups exist', async () => {
     queryBuilder.order.mockReturnValueOnce({ data: [], error: null });
 
-    const result = await getGroups();
+    const result = await getGroups(WALLET_ID);
     expect(result).toEqual([]);
   });
 
@@ -132,7 +134,7 @@ describe('getGroups', () => {
     const err = { message: 'connection error', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
 
-    await expect(getGroups()).rejects.toEqual(err);
+    await expect(getGroups(WALLET_ID)).rejects.toEqual(err);
   });
 });
 

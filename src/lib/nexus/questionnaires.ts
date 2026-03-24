@@ -2,6 +2,7 @@
 // Nexus Data — Questionnaires CRUD
 // Client-side mutations via Supabase SDK (ADR-006).
 // All operations use the anon client (respects RLS).
+// wallet_id isolation is app-layer (ADR-014).
 // ============================================================
 
 import { getAnonClient } from '../supabase.js';
@@ -43,12 +44,13 @@ function validateQuestions(questions: QuestionnaireQuestion[]): void {
 // ── CRUD operations ─────────────────────────────────────────
 
 /**
- * List all questionnaires for the current user.
+ * List all questionnaires for a wallet.
  */
-export async function getQuestionnaires(): Promise<Questionnaire[]> {
+export async function getQuestionnaires(walletId: string): Promise<Questionnaire[]> {
   const { data, error } = await getAnonClient()
     .from(TABLE)
     .select('*')
+    .eq('wallet_id', walletId)
     .order('created_at', { ascending: true });
 
   if (error) throw error;

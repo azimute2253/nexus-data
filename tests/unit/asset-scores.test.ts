@@ -466,9 +466,10 @@ describe('getScoresByQuestionnaire', () => {
     ];
     queryBuilder.order.mockReturnValueOnce({ data: scores, error: null });
 
-    const result = await getScoresByQuestionnaire(QUESTIONNAIRE_ID);
+    const result = await getScoresByQuestionnaire(WALLET_ID, QUESTIONNAIRE_ID);
 
     expect(queryBuilder.from).toHaveBeenCalledWith('asset_scores');
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.eq).toHaveBeenCalledWith('questionnaire_id', QUESTIONNAIRE_ID);
     expect(result).toHaveLength(2);
     expect(result[0].total_score).toBe(8);
@@ -478,7 +479,7 @@ describe('getScoresByQuestionnaire', () => {
   it('returns empty array when no scores exist', async () => {
     queryBuilder.order.mockReturnValueOnce({ data: [], error: null });
 
-    const result = await getScoresByQuestionnaire(QUESTIONNAIRE_ID);
+    const result = await getScoresByQuestionnaire(WALLET_ID, QUESTIONNAIRE_ID);
     expect(result).toEqual([]);
   });
 
@@ -486,7 +487,7 @@ describe('getScoresByQuestionnaire', () => {
     const err = { message: 'timeout', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
 
-    await expect(getScoresByQuestionnaire(QUESTIONNAIRE_ID)).rejects.toEqual(err);
+    await expect(getScoresByQuestionnaire(WALLET_ID, QUESTIONNAIRE_ID)).rejects.toEqual(err);
   });
 });
 

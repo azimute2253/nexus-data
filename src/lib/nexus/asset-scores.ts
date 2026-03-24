@@ -3,6 +3,7 @@
 // Client-side mutations via Supabase SDK (ADR-006).
 // Score calculation: sum(answer.value * question.weight)
 // where Sim=1 (true), Nao=0 (false).
+// wallet_id isolation is app-layer (ADR-014).
 // ============================================================
 
 import { getAnonClient } from '../supabase.js';
@@ -159,15 +160,17 @@ export async function deleteAssetScore(
 }
 
 /**
- * Get all scores for assets within a specific questionnaire.
+ * Get all scores for assets within a specific questionnaire, filtered by wallet.
  * Used for building score arrays for normalizeScores().
  */
 export async function getScoresByQuestionnaire(
+  walletId: string,
   questionnaireId: string,
 ): Promise<AssetScore[]> {
   const { data, error } = await getAnonClient()
     .from(TABLE)
     .select('*')
+    .eq('wallet_id', walletId)
     .eq('questionnaire_id', questionnaireId)
     .order('created_at', { ascending: true });
 

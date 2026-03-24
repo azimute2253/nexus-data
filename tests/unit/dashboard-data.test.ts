@@ -247,7 +247,7 @@ describe('getRebalanceRecommendations', () => {
     { id: 'g1', type_id: 't1', name: 'FIIs Logísticos', target_pct: 100, scoring_method: 'questionnaire', user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
   ];
   const mockAssets: Asset[] = [
-    { id: 'a1', ticker: 'HGLG11', name: 'CSHG Logística', sector: 'Logística', quantity: 10, group_id: 'g1', price_source: 'brapi', is_active: true, manual_override: false, whole_shares: true, bought: false, sold: false, user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
+    { id: 'a1', ticker: 'HGLG11', name: 'CSHG Logística', sector: 'Logística', quantity: 10, group_id: 'g1', price_source: 'brapi', is_active: true, manual_override: false, whole_shares: true, bought: false, sold: false, weight_mode: 'questionnaire', manual_weight: 0, user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
   ];
   const mockScores: AssetScore[] = [
     { id: 's1', asset_id: 'a1', questionnaire_id: 'q1', answers: [], total_score: 5, user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
@@ -300,7 +300,7 @@ describe('getRebalanceRecommendations', () => {
       { ticker: 'VT', price: 100.0, currency: 'USD', source: 'yahoo', fetched_at: '', user_id: USER_ID },
     ];
     const usdAssets: Asset[] = [
-      { id: 'a2', ticker: 'VT', name: 'Vanguard Total', sector: 'ETF', quantity: 5, group_id: 'g1', price_source: 'yahoo', is_active: true, manual_override: false, whole_shares: false, bought: false, sold: false, user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
+      { id: 'a2', ticker: 'VT', name: 'Vanguard Total', sector: 'ETF', quantity: 5, group_id: 'g1', price_source: 'yahoo', is_active: true, manual_override: false, whole_shares: false, bought: false, sold: false, weight_mode: 'questionnaire', manual_weight: 0, user_id: USER_ID, wallet_id: WALLET_ID, created_at: '', updated_at: '' },
     ];
     const rates: ExchangeRate[] = [
       { pair: 'USD/BRL', rate: 5.0, fetched_at: '', user_id: USER_ID },

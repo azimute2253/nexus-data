@@ -40,6 +40,8 @@ export type AssetGroupUpdate = Partial<Omit<AssetGroup, 'id' | 'created_at' | 'u
 
 export type PriceSource = 'brapi' | 'yahoo' | 'manual' | 'crypto' | 'exchange';
 
+export type WeightMode = 'manual' | 'questionnaire';
+
 export interface Asset {
   id: string;
   ticker: string;
@@ -53,6 +55,8 @@ export interface Asset {
   whole_shares: boolean;
   bought: boolean;
   sold: boolean;
+  weight_mode: WeightMode;
+  manual_weight: number;
   user_id: string;
   wallet_id: string;
   created_at: string;

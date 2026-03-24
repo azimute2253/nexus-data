@@ -2,6 +2,7 @@
 // Nexus Data — Asset Groups CRUD
 // Client-side mutations via Supabase SDK (ADR-006).
 // All operations use the anon client (respects RLS).
+// wallet_id isolation is app-layer (ADR-014).
 // ============================================================
 
 import { getAnonClient } from '../supabase.js';
@@ -10,10 +11,13 @@ import type { AssetGroup, AssetGroupInsert, AssetGroupUpdate } from './types.js'
 const TABLE = 'asset_groups';
 
 /**
- * List all asset groups, optionally filtered by type_id.
+ * List all asset groups for a wallet, optionally filtered by type_id.
  */
-export async function getGroups(typeId?: string): Promise<AssetGroup[]> {
-  let query = getAnonClient().from(TABLE).select('*');
+export async function getGroups(walletId: string, typeId?: string): Promise<AssetGroup[]> {
+  let query = getAnonClient()
+    .from(TABLE)
+    .select('*')
+    .eq('wallet_id', walletId);
 
   if (typeId) {
     query = query.eq('type_id', typeId);

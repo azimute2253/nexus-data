@@ -70,6 +70,8 @@ function makeAsset(overrides: Partial<Asset> = {}): Asset {
     whole_shares: true,
     bought: false,
     sold: false,
+    weight_mode: 'questionnaire',
+    manual_weight: 0,
     user_id: USER_ID,
     wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
@@ -109,10 +111,11 @@ describe('getAssets', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: assets, error: null });
 
-    const result = await getAssets();
+    const result = await getAssets(WALLET_ID);
 
     expect(queryBuilder.from).toHaveBeenCalledWith('assets');
     expect(queryBuilder.select).toHaveBeenCalledWith('*');
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.order).toHaveBeenCalledWith('ticker', { ascending: true });
     expect(result).toEqual(assets);
   });
@@ -122,8 +125,9 @@ describe('getAssets', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: assets, error: null });
 
-    const result = await getAssets(GROUP_ID);
+    const result = await getAssets(WALLET_ID, GROUP_ID);
 
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.eq).toHaveBeenCalledWith('group_id', GROUP_ID);
     expect(result).toEqual(assets);
   });
@@ -131,7 +135,7 @@ describe('getAssets', () => {
   it('returns empty array when no assets exist', async () => {
     queryBuilder.order.mockReturnValueOnce({ data: [], error: null });
 
-    const result = await getAssets();
+    const result = await getAssets(WALLET_ID);
     expect(result).toEqual([]);
   });
 
@@ -143,7 +147,7 @@ describe('getAssets', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: assets, error: null });
 
-    const result = await getAssets();
+    const result = await getAssets(WALLET_ID);
     expect(result[0].bought).toBe(true);
     expect(result[0].sold).toBe(false);
     expect(result[1].bought).toBe(false);
@@ -154,7 +158,7 @@ describe('getAssets', () => {
     const err = { message: 'connection error', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
 
-    await expect(getAssets()).rejects.toEqual(err);
+    await expect(getAssets(WALLET_ID)).rejects.toEqual(err);
   });
 });
 

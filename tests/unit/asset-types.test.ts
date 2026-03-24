@@ -100,10 +100,11 @@ describe('getAssetTypes', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: types, error: null });
 
-    const result = await getAssetTypes();
+    const result = await getAssetTypes(WALLET_ID);
 
     expect(queryBuilder.from).toHaveBeenCalledWith('asset_types');
     expect(queryBuilder.select).toHaveBeenCalledWith('*');
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(queryBuilder.order).toHaveBeenCalledWith('sort_order', { ascending: true });
     expect(result).toEqual(types);
   });
@@ -111,7 +112,7 @@ describe('getAssetTypes', () => {
   it('returns empty array when no types exist', async () => {
     queryBuilder.order.mockReturnValueOnce({ data: [], error: null });
 
-    const result = await getAssetTypes();
+    const result = await getAssetTypes(WALLET_ID);
     expect(result).toEqual([]);
   });
 
@@ -119,7 +120,7 @@ describe('getAssetTypes', () => {
     const err = { message: 'connection error', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
 
-    await expect(getAssetTypes()).rejects.toEqual(err);
+    await expect(getAssetTypes(WALLET_ID)).rejects.toEqual(err);
   });
 });
 

@@ -119,10 +119,11 @@ describe('getQuestionnaires', () => {
 
     queryBuilder.order.mockReturnValueOnce({ data: questionnaires, error: null });
 
-    const result = await getQuestionnaires();
+    const result = await getQuestionnaires(WALLET_ID);
 
     expect(queryBuilder.from).toHaveBeenCalledWith('questionnaires');
     expect(queryBuilder.select).toHaveBeenCalledWith('*');
+    expect(queryBuilder.eq).toHaveBeenCalledWith('wallet_id', WALLET_ID);
     expect(result).toHaveLength(3);
     expect(result.map((q: Questionnaire) => q.name)).toEqual(['FIIs', 'Acoes', 'ETFs']);
   });
@@ -130,7 +131,7 @@ describe('getQuestionnaires', () => {
   it('returns empty array when no questionnaires exist', async () => {
     queryBuilder.order.mockReturnValueOnce({ data: [], error: null });
 
-    const result = await getQuestionnaires();
+    const result = await getQuestionnaires(WALLET_ID);
     expect(result).toEqual([]);
   });
 
@@ -138,7 +139,7 @@ describe('getQuestionnaires', () => {
     const err = { message: 'connection error', code: '500' };
     queryBuilder.order.mockReturnValueOnce({ data: null, error: err });
 
-    await expect(getQuestionnaires()).rejects.toEqual(err);
+    await expect(getQuestionnaires(WALLET_ID)).rejects.toEqual(err);
   });
 });
 

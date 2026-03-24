@@ -1,34 +1,34 @@
 // ============================================================
-// Nexus Data — Asset Types CRUD
+// Nexus Data — Contributions CRUD
 // Client-side mutations via Supabase SDK (ADR-006).
 // All operations use the anon client (respects RLS).
 // wallet_id isolation is app-layer (ADR-014).
 // ============================================================
 
 import { getAnonClient } from '../supabase.js';
-import type { AssetType, AssetTypeInsert, AssetTypeUpdate } from './types.js';
+import type { Contribution, ContributionInsert, ContributionUpdate } from './types.js';
 
-const TABLE = 'asset_types';
+const TABLE = 'contributions';
 
 /**
- * List all asset types for a wallet, ordered by sort_order.
+ * List all contributions for a wallet, ordered by contributed_at descending.
  */
-export async function getAssetTypes(walletId: string): Promise<AssetType[]> {
+export async function getContributions(walletId: string): Promise<Contribution[]> {
   const { data, error } = await getAnonClient()
     .from(TABLE)
     .select('*')
     .eq('wallet_id', walletId)
-    .order('sort_order', { ascending: true });
+    .order('contributed_at', { ascending: false });
 
   if (error) throw error;
   return data;
 }
 
 /**
- * Get a single asset type by ID.
+ * Get a single contribution by ID.
  * Returns null if not found.
  */
-export async function getAssetType(id: string): Promise<AssetType | null> {
+export async function getContribution(id: string): Promise<Contribution | null> {
   const { data, error } = await getAnonClient()
     .from(TABLE)
     .select('*')
@@ -40,14 +40,14 @@ export async function getAssetType(id: string): Promise<AssetType | null> {
 }
 
 /**
- * Create a new asset type.
- * Validates that name is non-empty.
+ * Create a new contribution.
+ * Validates that amount is positive.
  */
-export async function createAssetType(
-  input: AssetTypeInsert,
-): Promise<AssetType> {
-  if (!input.name?.trim()) {
-    throw new Error('Asset type name is required');
+export async function createContribution(
+  input: ContributionInsert,
+): Promise<Contribution> {
+  if (input.amount !== null && input.amount !== undefined && input.amount <= 0) {
+    throw new Error('Contribution amount must be positive');
   }
 
   const { data, error } = await getAnonClient()
@@ -61,22 +61,22 @@ export async function createAssetType(
 }
 
 /**
- * Update an existing asset type.
+ * Update an existing contribution.
  * At least one field must be provided.
  */
-export async function updateAssetType(
+export async function updateContribution(
   id: string,
-  updates: AssetTypeUpdate,
-): Promise<AssetType> {
+  updates: ContributionUpdate,
+): Promise<Contribution> {
   const keys = Object.keys(updates).filter(
-    (k) => updates[k as keyof AssetTypeUpdate] !== undefined,
+    (k) => updates[k as keyof ContributionUpdate] !== undefined,
   );
   if (keys.length === 0) {
     throw new Error('At least one field must be provided for update');
   }
 
-  if ('name' in updates && !updates.name?.trim()) {
-    throw new Error('Asset type name cannot be empty');
+  if ('amount' in updates && updates.amount !== null && updates.amount !== undefined && updates.amount <= 0) {
+    throw new Error('Contribution amount must be positive');
   }
 
   const { data, error } = await getAnonClient()
@@ -91,9 +91,9 @@ export async function updateAssetType(
 }
 
 /**
- * Delete an asset type by ID.
+ * Delete a contribution by ID.
  */
-export async function deleteAssetType(id: string): Promise<void> {
+export async function deleteContribution(id: string): Promise<void> {
   const { error } = await getAnonClient()
     .from(TABLE)
     .delete()
