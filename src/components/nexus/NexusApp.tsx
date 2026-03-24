@@ -23,6 +23,10 @@ export interface NexusAppProps {
   userId: string;
   /** Email for display */
   userEmail: string;
+  /** Supabase project URL (pass from import.meta.env.PUBLIC_SUPABASE_URL) */
+  supabaseUrl?: string;
+  /** Supabase anon key (pass from import.meta.env.PUBLIC_SUPABASE_ANON_KEY) */
+  supabaseAnonKey?: string;
 }
 
 type Tab = 'dashboard' | 'aportes' | 'ativos';
@@ -34,7 +38,12 @@ function readStoredWalletId(): string | null {
 
 // ---------- Component ----------
 
-export function NexusApp({ userId, userEmail }: NexusAppProps) {
+export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: NexusAppProps) {
+  // Bootstrap Supabase client if credentials provided (browser-safe)
+  if (supabaseUrl && supabaseAnonKey && typeof window !== 'undefined') {
+    (window as Record<string, unknown>).__NEXUS_SUPABASE_URL__ = supabaseUrl;
+    (window as Record<string, unknown>).__NEXUS_SUPABASE_ANON_KEY__ = supabaseAnonKey;
+  }
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [activeWalletId, setActiveWalletId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');

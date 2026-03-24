@@ -8,7 +8,14 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 // --------------- environment helpers ---------------
 
 function requireEnv(name: string): string {
-  const value = process.env[name];
+  // Browser: check window globals injected by NexusApp
+  if (typeof window !== 'undefined') {
+    const windowKey = `__NEXUS_${name}__`;
+    const value = (window as Record<string, string>)[windowKey];
+    if (value) return value;
+  }
+  // Node.js / SSR: process.env
+  const value = (typeof process !== 'undefined' && process.env) ? process.env[name] : undefined;
   if (!value) {
     throw new Error(`Missing environment variable: ${name}`);
   }
