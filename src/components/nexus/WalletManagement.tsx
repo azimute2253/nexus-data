@@ -361,7 +361,8 @@ export function WalletManagement({
         const updated = await getWallets(userId);
         setShowCreateModal(false);
         onWalletsChange(updated, created);
-      } catch {
+      } catch (err) {
+        console.error("[WalletManagement] error:", err);
         // Error handled by caller or UI layer
       } finally {
         setIsSubmitting(false);
@@ -384,7 +385,8 @@ export function WalletManagement({
         // Keep active wallet, but with updated data
         const newActive = activeWallet?.id === renamed.id ? renamed : activeWallet;
         onWalletsChange(updated, newActive);
-      } catch {
+      } catch (err) {
+        console.error("[WalletManagement] error:", err);
         // Error handled by caller or UI layer
       } finally {
         setIsSubmitting(false);
@@ -411,7 +413,8 @@ export function WalletManagement({
         const mostRecent = updated[updated.length - 1];
         onWalletsChange(updated, mostRecent);
       }
-    } catch {
+    } catch (err) {
+        console.error("[WalletManagement] error:", err);
       // Error handled by caller or UI layer
     } finally {
       setIsSubmitting(false);

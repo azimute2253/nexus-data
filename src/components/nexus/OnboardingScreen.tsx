@@ -12,7 +12,7 @@ import { createWallet } from '../../lib/nexus/wallets.js';
 
 // ---------- Constants ----------
 
-const STORAGE_KEY = 'nexus_active_wallet_id';
+import { NEXUS_ACTIVE_WALLET_KEY as STORAGE_KEY } from '../../lib/nexus/constants';
 const MAX_NAME_LENGTH = 50;
 
 // ---------- localStorage helper ----------
