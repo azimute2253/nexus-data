@@ -31,6 +31,9 @@ export type { TabNavigationProps, TabId, TabDef } from './components/nexus/TabNa
 export { PriceRefreshButton } from './components/nexus/PriceRefreshButton';
 export type { PriceRefreshButtonProps } from './components/nexus/PriceRefreshButton';
 
+export { WalletSelector } from './components/nexus/WalletSelector';
+export type { WalletSelectorProps } from './components/nexus/WalletSelector';
+
 // === Mobile Components ===
 export { MobileRebalance } from './components/mobile/MobileRebalance';
 export type { MobileRebalanceProps } from './components/mobile/MobileRebalance';
