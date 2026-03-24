@@ -53,6 +53,7 @@ import {
 // ── Fixtures ────────────────────────────────────────────────
 
 const USER_ID = '00000000-0000-0000-0000-000000000001';
+const WALLET_ID = '00000000-0000-0000-0000-000000000099';
 const GROUP_ID = '33333333-3333-3333-3333-333333333333';
 
 function makeAsset(overrides: Partial<Asset> = {}): Asset {
@@ -70,6 +71,7 @@ function makeAsset(overrides: Partial<Asset> = {}): Asset {
     bought: false,
     sold: false,
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,

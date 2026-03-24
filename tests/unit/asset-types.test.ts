@@ -53,6 +53,7 @@ import {
 // ── Fixtures ────────────────────────────────────────────────
 
 const USER_ID = '00000000-0000-0000-0000-000000000001';
+const WALLET_ID = '00000000-0000-0000-0000-000000000099';
 
 function makeAssetType(overrides: Partial<AssetType> = {}): AssetType {
   return {
@@ -61,6 +62,7 @@ function makeAssetType(overrides: Partial<AssetType> = {}): AssetType {
     target_pct: 15,
     sort_order: 1,
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,

@@ -57,6 +57,7 @@ import {
 // ── Fixtures ────────────────────────────────────────────────
 
 const USER_ID = '00000000-0000-0000-0000-000000000001';
+const WALLET_ID = '00000000-0000-0000-0000-000000000099';
 const Q_ID = '22222222-2222-2222-2222-222222222222';
 const TYPE_ID = '33333333-3333-3333-3333-333333333333';
 
@@ -80,6 +81,7 @@ function makeQuestionnaire(overrides: Partial<Questionnaire> = {}): Questionnair
       makeQuestion({ id: 'q2', text: 'DY acima de 0.7% ao mês?', sort_order: 2 }),
     ],
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,

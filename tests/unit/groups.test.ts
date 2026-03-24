@@ -53,6 +53,7 @@ import {
 // ── Fixtures ────────────────────────────────────────────────
 
 const USER_ID = '00000000-0000-0000-0000-000000000001';
+const WALLET_ID = '00000000-0000-0000-0000-000000000099';
 const TYPE_ID = '22222222-2222-2222-2222-222222222222';
 
 function makeGroup(overrides: Partial<AssetGroup> = {}): AssetGroup {
@@ -63,6 +64,7 @@ function makeGroup(overrides: Partial<AssetGroup> = {}): AssetGroup {
     target_pct: 60,
     scoring_method: 'bazin',
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,

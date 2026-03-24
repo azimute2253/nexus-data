@@ -114,6 +114,7 @@ export async function saveAssetScore(
   answers: ScoreAnswer[],
   questionnaire: Questionnaire,
   userId: string,
+  walletId: string,
 ): Promise<AssetScore> {
   // Validate all questions answered
   validateAnswers(answers, questionnaire.questions);
@@ -127,6 +128,7 @@ export async function saveAssetScore(
     answers,
     total_score: totalScore,
     user_id: userId,
+    wallet_id: walletId,
   };
 
   // Upsert: insert or update on conflict (asset_id, questionnaire_id)

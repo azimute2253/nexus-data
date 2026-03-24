@@ -11,6 +11,7 @@ export interface AssetType {
   target_pct: number | null;
   sort_order: number | null;
   user_id: string;
+  wallet_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +28,7 @@ export interface AssetGroup {
   target_pct: number | null;
   scoring_method: string;
   user_id: string;
+  wallet_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +54,7 @@ export interface Asset {
   bought: boolean;
   sold: boolean;
   user_id: string;
+  wallet_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -92,6 +95,7 @@ export interface Questionnaire {
   asset_type_id: string | null;
   questions: QuestionnaireQuestion[];
   user_id: string;
+  wallet_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -114,6 +118,7 @@ export interface AssetScore {
   answers: ScoreAnswer[];
   total_score: number;
   user_id: string;
+  wallet_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -129,6 +134,7 @@ export interface Contribution {
   amount: number | null;
   distribution: unknown | null;
   user_id: string;
+  wallet_id: string;
   created_at: string;
 }
 

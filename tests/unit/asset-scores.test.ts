@@ -58,6 +58,7 @@ import {
 // ── Fixtures ────────────────────────────────────────────────
 
 const USER_ID = '00000000-0000-0000-0000-000000000001';
+const WALLET_ID = '00000000-0000-0000-0000-000000000099';
 const ASSET_ID = '11111111-1111-1111-1111-111111111111';
 const QUESTIONNAIRE_ID = '22222222-2222-2222-2222-222222222222';
 const TYPE_ID = '33333333-3333-3333-3333-333333333333';
@@ -82,6 +83,7 @@ function makeQuestionnaire(
     asset_type_id: TYPE_ID,
     questions,
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
@@ -96,6 +98,7 @@ function makeAssetScore(overrides: Partial<AssetScore> = {}): AssetScore {
     answers: [{ question_id: 'q1', value: true }],
     total_score: 1,
     user_id: USER_ID,
+    wallet_id: WALLET_ID,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
@@ -337,7 +340,7 @@ describe('saveAssetScore', () => {
     queryBuilder.single.mockReturnValueOnce({ data: savedScore, error: null });
 
     const result = await saveAssetScore(
-      ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID,
+      ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID, WALLET_ID,
     );
 
     expect(queryBuilder.from).toHaveBeenCalledWith('asset_scores');
@@ -348,6 +351,7 @@ describe('saveAssetScore', () => {
         answers,
         total_score: 1,
         user_id: USER_ID,
+        wallet_id: WALLET_ID,
       },
       { onConflict: 'asset_id,questionnaire_id' },
     );
@@ -376,7 +380,7 @@ describe('saveAssetScore', () => {
     ];
 
     await expect(
-      saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID),
+      saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID, WALLET_ID),
     ).rejects.toThrow('Pergunta "q2" não foi respondida');
 
     // No DB call should happen
@@ -399,7 +403,7 @@ describe('saveAssetScore', () => {
     const savedScore = makeAssetScore({ total_score: 1 });
     queryBuilder.single.mockReturnValueOnce({ data: savedScore, error: null });
 
-    await saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID);
+    await saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID, WALLET_ID);
 
     // Verify the total_score in the upsert payload
     const upsertCall = queryBuilder.upsert.mock.calls[0][0];
@@ -415,7 +419,7 @@ describe('saveAssetScore', () => {
     queryBuilder.single.mockReturnValueOnce({ data: null, error: err });
 
     await expect(
-      saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID),
+      saveAssetScore(ASSET_ID, QUESTIONNAIRE_ID, answers, questionnaire, USER_ID, WALLET_ID),
     ).rejects.toEqual(err);
   });
 });
