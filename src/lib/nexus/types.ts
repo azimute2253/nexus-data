@@ -235,6 +235,7 @@ export interface L3Result {
   shares_to_buy: number;    // quantity (integer for whole_shares, fractional otherwise)
   estimated_cost_brl: number; // shares_to_buy * price_brl
   remainder_brl: number;    // allocated - estimated_cost (due to FLOOR rounding)
+  weight_mode?: WeightMode; // optional: populated by data layer for UI display (ADR-015)
 }
 
 /** Summary of L3 distribution for a group */

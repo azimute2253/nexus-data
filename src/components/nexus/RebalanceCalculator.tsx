@@ -64,6 +64,11 @@ function AssetRow({ asset }: { asset: L3Result }) {
           COMPRAR
         </span>
         <span className="font-medium text-gray-900">{asset.ticker}</span>
+        {asset.weight_mode && (
+          <span className="text-xs text-gray-400">
+            ({asset.weight_mode === 'manual' ? 'manual' : 'questionário'})
+          </span>
+        )}
       </div>
       <div className="text-right text-xs text-gray-600 md:text-sm">
         <span className="font-medium text-gray-900">

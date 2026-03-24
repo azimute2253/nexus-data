@@ -15,6 +15,7 @@ import type {
   AssetType,
   AssetGroup,
   AssetScore,
+  WeightMode,
   L1TypeInput,
   L2GroupInput,
   L3AssetInput,
@@ -295,11 +296,27 @@ export async function getRebalanceRecommendations(
     };
   }
 
+  // Build weight_mode map: asset_id → weight_mode (for UI display, ADR-015)
+  const weightModeMap = new Map<string, WeightMode>();
+  for (const a of assets) {
+    weightModeMap.set(a.id, a.weight_mode);
+  }
+
   try {
     const result = rebalance(
       { types: l1Inputs, groups: l2Inputs, assets: l3Inputs },
       contribution,
     );
+
+    // Enrich L3 results with weight_mode for UI indicator (Story 15.2)
+    for (const type of result.types) {
+      for (const group of type.groups) {
+        for (const asset of group.assets) {
+          asset.weight_mode = weightModeMap.get(asset.asset_id);
+        }
+      }
+    }
+
     return { data: result, error: null };
   } catch (err) {
     return {

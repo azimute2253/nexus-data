@@ -1,8 +1,8 @@
 // ============================================================
 // Nexus Data — Empty Dashboard Component
-// Shown after onboarding when the wallet has no assets yet.
+// Shown when the active wallet has no assets/types yet.
 // Guides user to the Ativos tab to start adding asset types.
-// [Story 12.3, ADR-016, ADR-013]
+// [Story 12.3, Story 15.1, ADR-016, ADR-013]
 // ============================================================
 
 // ---------- Props ----------
@@ -46,7 +46,10 @@ export function EmptyDashboard({ onNavigateAtivos }: EmptyDashboardProps) {
     >
       <IconFolder className="h-12 w-12 text-gray-300" />
 
-      <div className="space-y-1">
+      <div className="space-y-2">
+        <h2 className="text-base font-semibold text-gray-900 md:text-lg">
+          Carteira vazia
+        </h2>
         <p className="text-sm text-gray-600 md:text-base">
           Sua carteira está vazia. Comece adicionando suas classes de ativo na aba Ativos.
         </p>

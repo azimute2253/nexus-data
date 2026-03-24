@@ -16,6 +16,9 @@ export type { AssetTableProps } from './components/nexus/AssetTable';
 export { Dashboard } from './components/nexus/Dashboard';
 export type { DashboardProps } from './components/nexus/Dashboard';
 
+export { DashboardTab } from './components/nexus/DashboardTab';
+export type { DashboardTabProps } from './components/nexus/DashboardTab';
+
 export { DeviationBar, getDeviationLevel, getBarWidthPct, MAX_DEVIATION_PP, ALIGNED_THRESHOLD_PP, SIGNIFICANT_THRESHOLD_PP } from './components/nexus/DeviationBar';
 export type { DeviationBarProps, DeviationLevel } from './components/nexus/DeviationBar';
 
@@ -40,6 +43,12 @@ export type { WalletManagementProps } from './components/nexus/WalletManagement'
 export { ConfirmDialog } from './components/nexus/ConfirmDialog';
 export type { ConfirmDialogProps } from './components/nexus/ConfirmDialog';
 
+export { AportesTab } from './components/nexus/AportesTab';
+export type { AportesTabProps } from './components/nexus/AportesTab';
+
+export { ContributionHistory } from './components/nexus/ContributionHistory';
+export type { ContributionHistoryProps } from './components/nexus/ContributionHistory';
+
 // === Mobile Components ===
 export { MobileRebalance } from './components/mobile/MobileRebalance';
 export type { MobileRebalanceProps } from './components/mobile/MobileRebalance';
@@ -59,6 +68,7 @@ export * from './lib/dashboard/data';
 export * from './lib/dashboard/allocation-utils';
 export * from './lib/dashboard/calculator-utils';
 export * from './lib/dashboard/refresh';
+export * from './lib/dashboard/wallet-data';
 
 // === Nexus CRUD ===
 export * from './lib/nexus/types';
@@ -72,6 +82,18 @@ export * from './lib/nexus/wallets';
 export * from './lib/nexus/rebalance';
 export * from './lib/nexus/data';
 export { DualWeightPanel } from './components/nexus/DualWeightPanel';
+
+export { AtivosTab } from './components/nexus/AtivosTab';
+export type { AtivosTabProps } from './components/nexus/AtivosTab';
+
+export { AssetTree } from './components/nexus/AssetTree';
+export type { AssetTreeProps } from './components/nexus/AssetTree';
+
+export { ClassNode, GroupNode, AssetNode, CreateClassForm, CreateGroupForm, CreateAssetForm } from './components/nexus/AssetTreeNode';
+export type { ClassNodeProps, GroupNodeProps, AssetNodeProps, CreateClassFormProps, CreateGroupFormProps, CreateAssetFormProps } from './components/nexus/AssetTreeNode';
+
+export { TargetWarning } from './components/nexus/TargetWarning';
+export type { TargetWarningProps } from './components/nexus/TargetWarning';
 
 export { OnboardingScreen } from './components/nexus/OnboardingScreen';
 export type { OnboardingScreenProps } from './components/nexus/OnboardingScreen';
