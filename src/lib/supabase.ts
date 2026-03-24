@@ -57,14 +57,20 @@ let _anonClient: SupabaseClient | null = null;
 
 /**
  * Returns a Supabase client authenticated with the **anon** key.
- * Safe for browser use — respects RLS policies.
+ * Browser: uses @supabase/ssr createBrowserClient to read auth cookies.
+ * Node/SSR: plain createClient.
  */
 export function getAnonClient(): SupabaseClient {
   if (!_anonClient) {
-    _anonClient = createClient(
-      requireEnv("PUBLIC_SUPABASE_URL"),
-      requireEnv("PUBLIC_SUPABASE_ANON_KEY"),
-    );
+    const url = requireEnv("PUBLIC_SUPABASE_URL");
+    const key = requireEnv("PUBLIC_SUPABASE_ANON_KEY");
+    if (typeof window !== 'undefined') {
+      // Browser: createBrowserClient reads session from cookies automatically
+      const { createBrowserClient } = require('@supabase/ssr');
+      _anonClient = createBrowserClient(url, key);
+    } else {
+      _anonClient = createClient(url, key);
+    }
   }
   return _anonClient;
 }
