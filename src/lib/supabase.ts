@@ -4,6 +4,7 @@
 // ============================================================
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 // --------------- environment helpers ---------------
 
@@ -66,7 +67,6 @@ export function getAnonClient(): SupabaseClient {
     const key = requireEnv("PUBLIC_SUPABASE_ANON_KEY");
     if (typeof window !== 'undefined') {
       // Browser: createBrowserClient reads session from cookies automatically
-      const { createBrowserClient } = require('@supabase/ssr');
       _anonClient = createBrowserClient(url, key);
     } else {
       _anonClient = createClient(url, key);
