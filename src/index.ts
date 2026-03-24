@@ -65,3 +65,4 @@ export * from './lib/nexus/questionnaires';
 export * from './lib/nexus/wallets';
 export * from './lib/nexus/rebalance';
 export * from './lib/nexus/data';
+export { DualWeightPanel } from './components/nexus/DualWeightPanel';

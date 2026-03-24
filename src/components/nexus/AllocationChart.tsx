@@ -237,12 +237,12 @@ export function AllocationChart({
         <SinglePie
           title="Atual"
           data={actualSlices}
-          descText="Gráfico pizza mostrando a alocação atual do portfólio por tipo de ativo"
+          descText="Gráfico pizza mostrando a alocação atual do Nexus Data por tipo de ativo"
         />
         <SinglePie
           title="Target"
           data={targetSlices}
-          descText="Gráfico pizza mostrando a alocação alvo do portfólio por tipo de ativo"
+          descText="Gráfico pizza mostrando a alocação alvo do Nexus Data por tipo de ativo"
         />
       </div>
       <ColorLegend types={types} />
