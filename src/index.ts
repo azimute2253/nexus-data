@@ -100,3 +100,6 @@ export type { OnboardingScreenProps } from './components/nexus/OnboardingScreen'
 
 export { EmptyDashboard } from './components/nexus/EmptyDashboard';
 export type { EmptyDashboardProps } from './components/nexus/EmptyDashboard';
+
+export { NexusApp } from './components/nexus/NexusApp';
+export type { NexusAppProps } from './components/nexus/NexusApp';
