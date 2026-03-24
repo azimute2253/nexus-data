@@ -7,12 +7,20 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // --------------- environment helpers ---------------
 
+// Explicit mapping from env var name to window global key
+const WINDOW_GLOBALS: Record<string, string> = {
+  PUBLIC_SUPABASE_URL: '__NEXUS_SUPABASE_URL__',
+  PUBLIC_SUPABASE_ANON_KEY: '__NEXUS_SUPABASE_ANON_KEY__',
+};
+
 function requireEnv(name: string): string {
-  // Browser: check window globals injected by NexusApp
+  // Browser: check window globals injected by NexusApp (via supabaseUrl/supabaseAnonKey props)
   if (typeof window !== 'undefined') {
-    const windowKey = `__NEXUS_${name}__`;
-    const value = (window as Record<string, string>)[windowKey];
-    if (value) return value;
+    const windowKey = WINDOW_GLOBALS[name];
+    if (windowKey) {
+      const value = (window as Record<string, string>)[windowKey];
+      if (value) return value;
+    }
   }
   // Node.js / SSR: process.env
   const value = (typeof process !== 'undefined' && process.env) ? process.env[name] : undefined;
