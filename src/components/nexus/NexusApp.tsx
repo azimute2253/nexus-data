@@ -40,16 +40,22 @@ function readStoredWalletId(): string | null {
 // ---------- Component ----------
 
 export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: NexusAppProps) {
-  // Initialize Supabase client with credentials from host app
-  if (supabaseUrl && supabaseAnonKey) {
-    initSupabase(supabaseUrl, supabaseAnonKey);
-  }
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [activeWalletId, setActiveWalletId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showManage, setShowManage] = useState(false);
+  const [supabaseReady, setSupabaseReady] = useState(false);
+
+  // Initialize Supabase ONLY in browser (useEffect = client-side only)
+  // This prevents SSR from trying to create a Supabase client without env vars
+  useEffect(() => {
+    if (supabaseUrl && supabaseAnonKey) {
+      initSupabase(supabaseUrl, supabaseAnonKey);
+    }
+    setSupabaseReady(true);
+  }, [supabaseUrl, supabaseAnonKey]);
 
   // Read active tab from URL param
   useEffect(() => {
@@ -59,8 +65,9 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
     if (tab === 'aportes' || tab === 'ativos') setActiveTab(tab);
   }, []);
 
-  // Load wallets
+  // Load wallets (only after Supabase is initialized)
   useEffect(() => {
+    if (!supabaseReady) return;
     setLoading(true);
     getWallets(userId)
       .then((list) => {
@@ -79,7 +86,7 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
         setError('Erro ao carregar carteiras. Tente recarregar a página.');
         setLoading(false);
       });
-  }, [userId]);
+  }, [userId, supabaseReady]);
 
   // Handle wallet switch
   function handleWalletChange(id: string) {
