@@ -271,6 +271,18 @@ export interface RebalanceResult {
   types: RebalanceTypeResult[];
 }
 
+// ---------- wallets ----------
+
+export interface Wallet {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+}
+
+export type WalletInsert = Omit<Wallet, 'id' | 'created_at'>;
+export type WalletUpdate = Partial<Omit<Wallet, 'id' | 'created_at'>>;
+
 // ---------- feature_flags ----------
 
 export interface FeatureFlag {

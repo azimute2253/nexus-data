@@ -134,6 +134,35 @@ describe('asset-types Edge Function', () => {
     expect(body).toEqual(types);
   });
 
+  it('T10.1.2 — GET with auth, no types returns empty array', async () => {
+    mockGetUser.mockResolvedValueOnce({ data: { user: MOCK_USER }, error: null });
+    mockOrder.mockReturnValueOnce({ data: [], error: null });
+
+    const res = await handler(authedRequest('GET'));
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual([]);
+  });
+
+  it('T10.1.4 — each asset type contains id, name, target_pct, sort_order', async () => {
+    mockGetUser.mockResolvedValueOnce({ data: { user: MOCK_USER }, error: null });
+
+    const types = [
+      { id: '1', name: 'FIIs', target_pct: 15, sort_order: 0 },
+    ];
+    mockOrder.mockReturnValueOnce({ data: types, error: null });
+
+    const res = await handler(authedRequest('GET'));
+    const body = await res.json();
+
+    expect(body).toHaveLength(1);
+    expect(body[0]).toHaveProperty('id');
+    expect(body[0]).toHaveProperty('name');
+    expect(body[0]).toHaveProperty('target_pct');
+    expect(body[0]).toHaveProperty('sort_order');
+  });
+
   it('GET returns 500 on database error', async () => {
     mockGetUser.mockResolvedValueOnce({ data: { user: MOCK_USER }, error: null });
     mockOrder.mockReturnValueOnce({ data: null, error: { message: 'connection lost' } });
