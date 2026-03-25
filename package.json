@@ -5,7 +5,9 @@
   "description": "Conecte, organize, decida",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "Luis Kerber Adures",
@@ -19,13 +21,17 @@
     "vitest": "^4.1.0"
   },
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
-    "src/",
+    "dist/",
     "README.md",
     "LICENSE"
   ],
@@ -37,5 +43,6 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0"
-  }
+  },
+  "module": "./dist/index.js"
 }

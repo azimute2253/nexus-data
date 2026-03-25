@@ -12,6 +12,7 @@ import { NEXUS_ACTIVE_WALLET_KEY } from '../../lib/nexus/constants.js';
 import { OnboardingScreen } from './OnboardingScreen.js';
 import { WalletSelector } from './WalletSelector.js';
 import { WalletManagement } from './WalletManagement.js';
+import type { TabId } from './TabNavigation.js';
 import { TabNavigation } from './TabNavigation.js';
 import { DashboardTab } from './DashboardTab.js';
 import { AportesTab } from './AportesTab.js';
@@ -30,7 +31,8 @@ export interface NexusAppProps {
   supabaseAnonKey?: string;
 }
 
-type Tab = 'dashboard' | 'aportes' | 'ativos';
+// Use TabId from TabNavigation for type alignment
+type Tab = TabId;
 
 function readStoredWalletId(): string | null {
   if (typeof window === 'undefined') return null;
@@ -106,16 +108,20 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
     }
   }
 
-  // Handle wallets change from WalletManagement
-  function handleWalletsChange(updated: Wallet[], newActive: string | null) {
+  // Handle wallets change from WalletManagement (expects Wallet | null for activeWallet)
+  function handleWalletsChange(updated: Wallet[], newActiveWallet: Wallet | null) {
     setWallets(updated);
-    setActiveWalletId(newActive);
-    if (newActive) {
-      try { localStorage.setItem(NEXUS_ACTIVE_WALLET_KEY, newActive); } catch { /* ignore */ }
+    const newActiveId = newActiveWallet?.id ?? null;
+    setActiveWalletId(newActiveId);
+    if (newActiveId) {
+      try { localStorage.setItem(NEXUS_ACTIVE_WALLET_KEY, newActiveId); } catch { /* ignore */ }
     }
     setShowManage(false);
     // If no wallets left, onboarding shows automatically
   }
+
+  // Get the active wallet object from the ID
+  const activeWallet = wallets.find((w) => w.id === activeWalletId) ?? null;
 
   // --- Loading ---
   if (loading) {
@@ -136,17 +142,9 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
   }
 
   // --- Onboarding: no wallets ---
+  // OnboardingScreen only accepts userId; it handles wallet creation + page reload internally
   if (wallets.length === 0 || !activeWalletId) {
-    return (
-      <OnboardingScreen
-        userId={userId}
-        onWalletCreated={(wallet) => {
-          setWallets([wallet]);
-          setActiveWalletId(wallet.id);
-          try { localStorage.setItem(NEXUS_ACTIVE_WALLET_KEY, wallet.id); } catch { /* ignore */ }
-        }}
-      />
-    );
+    return <OnboardingScreen userId={userId} />;
   }
 
   // --- Main app ---
@@ -155,9 +153,8 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
       {/* Wallet selector + manage button */}
       <div className="nexus-app__header">
         <WalletSelector
-          wallets={wallets}
-          activeWalletId={activeWalletId}
-          onWalletChange={handleWalletChange}
+          userId={userId}
+          onWalletChange={(wallet) => handleWalletChange(wallet.id)}
           onCreateWallet={() => setShowManage(true)}
         />
         {wallets.length > 0 && (
@@ -175,28 +172,28 @@ export function NexusApp({ userId, userEmail, supabaseUrl, supabaseAnonKey }: Ne
       {showManage && (
         <WalletManagement
           wallets={wallets}
-          activeWalletId={activeWalletId}
+          activeWallet={activeWallet}
           userId={userId}
           onWalletsChange={handleWalletsChange}
-          onClose={() => setShowManage(false)}
         />
       )}
 
-      {/* Tabs */}
-      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
-
-      {/* Tab content */}
-      <div className="nexus-app__content">
-        {activeTab === 'dashboard' && (
-          <DashboardTab walletId={activeWalletId} userId={userId} />
+      {/* Tabs + Tab content (TabNavigation uses render prop pattern) */}
+      <TabNavigation activeTab={activeTab} onTabChange={handleTabChange}>
+        {(currentTab) => (
+          <div className="nexus-app__content">
+            {currentTab === 'dashboard' && (
+              <DashboardTab walletId={activeWalletId} userId={userId} />
+            )}
+            {currentTab === 'aportes' && (
+              <AportesTab walletId={activeWalletId} userId={userId} />
+            )}
+            {currentTab === 'ativos' && (
+              <AtivosTab walletId={activeWalletId} userId={userId} />
+            )}
+          </div>
         )}
-        {activeTab === 'aportes' && (
-          <AportesTab walletId={activeWalletId} userId={userId} />
-        )}
-        {activeTab === 'ativos' && (
-          <AtivosTab walletId={activeWalletId} userId={userId} />
-        )}
-      </div>
+      </TabNavigation>
 
       <style>{`
         .nexus-app { display: flex; flex-direction: column; gap: 1rem; }

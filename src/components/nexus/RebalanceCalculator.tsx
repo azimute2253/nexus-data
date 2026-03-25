@@ -6,7 +6,7 @@
 // [Story 5.5, ADR-004, ADR-006]
 // ============================================================
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type {
   RebalanceResult,
   RebalanceTypeResult,
@@ -237,6 +237,15 @@ export function RebalanceCalculator({
   const [result, setResult] = useState<RebalanceResult | null>(initialResult);
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
+
+  // Sync with async-loaded initialResult (e.g. when parent fetches after mount)
+  useEffect(() => {
+    if (initialResult !== null) setResult(initialResult);
+  }, [initialResult]);
+
+  useEffect(() => {
+    if (initialError !== null) setError(initialError);
+  }, [initialError]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [executionTime, setExecutionTime] = useState<number | null>(null);
 

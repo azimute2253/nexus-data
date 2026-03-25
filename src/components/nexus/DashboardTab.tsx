@@ -4,13 +4,14 @@
 // AllocationTable, PriceRefreshButton, EmptyDashboard.
 // All data filtered by active wallet_id (ADR-014).
 // Wallet switch triggers full data refresh (ADR-012).
+// Self-contained: fetches own data using walletId + userId.
 // [Story 15.1, ADR-006, ADR-012, ADR-013, ADR-014]
 // ============================================================
 
 import { useState, useEffect, useCallback } from 'react';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PerformanceMetrics, PortfolioSummary } from '../../lib/dashboard/types.js';
 import { getWalletDashboardData } from '../../lib/dashboard/wallet-data.js';
+import { getAnonClient, getSession } from '../../lib/supabase.js';
 import { Dashboard } from './Dashboard.js';
 import { AllocationChart } from './AllocationChart.js';
 import { AllocationTable } from './AllocationTable.js';
@@ -21,13 +22,9 @@ import { EmptyDashboard } from './EmptyDashboard.js';
 
 export interface DashboardTabProps {
   /** Active wallet ID from WalletSelector */
-  activeWalletId: string;
-  /** Supabase client (anon, browser-safe) */
-  supabaseClient: SupabaseClient;
-  /** Edge Function URL for price refresh */
-  refreshUrl: string;
-  /** Auth token for the Edge Function */
-  authToken: string;
+  walletId: string | null;
+  /** User ID for data filtering */
+  userId: string;
   /** Callback to navigate to Ativos tab */
   onNavigateAtivos?: () => void;
 }
@@ -81,23 +78,48 @@ function DashboardTabSkeleton() {
 // ---------- Main component ----------
 
 export function DashboardTab({
-  activeWalletId,
-  supabaseClient,
-  refreshUrl,
-  authToken,
+  walletId,
+  userId,
   onNavigateAtivos,
 }: DashboardTabProps) {
   const [performance, setPerformance] = useState<PerformanceMetrics | null>(null);
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshUrl, setRefreshUrl] = useState<string>('');
+  const [authToken, setAuthToken] = useState<string>('');
+
+  // Build refresh URL and auth token from Supabase client
+  useEffect(() => {
+    async function initRefreshConfig() {
+      try {
+        const client = getAnonClient();
+        // Extract Supabase URL from the client's internal config
+        const url = (client as unknown as { supabaseUrl?: string }).supabaseUrl;
+        if (url) {
+          setRefreshUrl(`${url}/functions/v1/refresh-prices`);
+        }
+        // Get auth token from session
+        const session = await getSession();
+        if (session?.access_token) {
+          setAuthToken(session.access_token);
+        }
+      } catch {
+        // Silently fail - price refresh will be disabled
+      }
+    }
+    initRefreshConfig();
+  }, []);
 
   const fetchData = useCallback(async () => {
+    if (!walletId) return;
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await getWalletDashboardData(supabaseClient, activeWalletId);
+      const client = getAnonClient();
+      const result = await getWalletDashboardData(client, walletId);
 
       if (result.portfolio.error) {
         setError(result.portfolio.error.message);
@@ -122,12 +144,21 @@ export function DashboardTab({
     } finally {
       setIsLoading(false);
     }
-  }, [supabaseClient, activeWalletId]);
+  }, [walletId]);
 
   // Fetch on mount and when wallet changes (AC6)
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // No wallet selected
+  if (!walletId) {
+    return (
+      <div className="p-4 md:p-6">
+        <EmptyDashboard onNavigateAtivos={onNavigateAtivos} />
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading) return <DashboardTabSkeleton />;
@@ -167,11 +198,13 @@ export function DashboardTab({
 
       {/* AC1: Price refresh button + last refresh timestamp */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <PriceRefreshButton
-          refreshUrl={refreshUrl}
-          authToken={authToken}
-          onRefreshComplete={fetchData}
-        />
+        {refreshUrl && authToken && (
+          <PriceRefreshButton
+            refreshUrl={refreshUrl}
+            authToken={authToken}
+            onRefreshComplete={fetchData}
+          />
+        )}
         <LastRefreshTimestamp fetchedAt={portfolio?.fetched_at ?? null} />
       </div>
 

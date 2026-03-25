@@ -2,6 +2,7 @@
 // Nexus Data — Aportes Tab Component
 // Combines RebalanceCalculator (pre-filled with last contribution)
 // and ContributionHistory. All data filtered by wallet_id (ADR-014).
+// Self-contained: fetches own data and computes rebalance internally.
 // [Story 15.2, F-030]
 // ============================================================
 
@@ -10,18 +11,16 @@ import type { RebalanceResult, Contribution } from '../../lib/nexus/types.js';
 import { RebalanceCalculator } from './RebalanceCalculator.js';
 import { ContributionHistory } from './ContributionHistory.js';
 import { getContributions } from '../../lib/nexus/contributions.js';
+import { getWalletRebalanceRecommendations } from '../../lib/dashboard/wallet-data.js';
+import { getAnonClient } from '../../lib/supabase.js';
 
 // ---------- Props ----------
 
 export interface AportesTabProps {
   /** Active wallet ID for data filtering */
-  walletId: string;
-  /** Pre-computed rebalance result from server-side data layer */
-  initialResult: RebalanceResult | null;
-  /** Callback to re-run rebalance with a new contribution amount */
-  onCalculate: (contribution: number) => Promise<RebalanceResult>;
-  /** Error from initial load */
-  initialError?: string | null;
+  walletId: string | null;
+  /** User ID for data filtering */
+  userId: string;
 }
 
 // ---------- Constants ----------
@@ -30,28 +29,44 @@ const DEFAULT_CONTRIBUTION = 12000;
 
 // ---------- Main component ----------
 
-export function AportesTab({
-  walletId,
-  initialResult,
-  onCalculate,
-  initialError = null,
-}: AportesTabProps) {
+export function AportesTab({ walletId, userId }: AportesTabProps) {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [defaultContribution, setDefaultContribution] = useState(DEFAULT_CONTRIBUTION);
+  const [initialResult, setInitialResult] = useState<RebalanceResult | null>(null);
+  const [initialError, setInitialError] = useState<string | null>(null);
+
+  // Compute rebalance result for a given contribution amount
+  const handleCalculate = useCallback(async (contribution: number): Promise<RebalanceResult> => {
+    if (!walletId) throw new Error('Nenhuma carteira selecionada');
+    const client = getAnonClient();
+    const result = await getWalletRebalanceRecommendations(client, walletId, contribution);
+    if (result.error) throw new Error(result.error.message);
+    if (!result.data) throw new Error('Sem resultado de rebalanceamento');
+    return result.data;
+  }, [walletId]);
 
   // Fetch contributions for the active wallet
-  const loadContributions = useCallback(async (wid: string) => {
+  const loadData = useCallback(async (wid: string) => {
     setIsLoadingHistory(true);
+    setInitialError(null);
     try {
       const data = await getContributions(wid);
       setContributions(data);
 
       // Pre-fill with last contribution amount, or default
-      if (data.length > 0 && data[0].amount !== null && data[0].amount > 0) {
-        setDefaultContribution(data[0].amount);
-      } else {
-        setDefaultContribution(DEFAULT_CONTRIBUTION);
+      const lastAmount = data.length > 0 && data[0].amount !== null && data[0].amount > 0
+        ? data[0].amount
+        : DEFAULT_CONTRIBUTION;
+      setDefaultContribution(lastAmount);
+
+      // Pre-compute initial rebalance result
+      try {
+        const result = await handleCalculate(lastAmount);
+        setInitialResult(result);
+      } catch (err) {
+        setInitialError(err instanceof Error ? err.message : 'Erro ao calcular rebalanceamento');
+        setInitialResult(null);
       }
     } catch {
       setContributions([]);
@@ -59,12 +74,26 @@ export function AportesTab({
     } finally {
       setIsLoadingHistory(false);
     }
-  }, []);
+  }, [handleCalculate]);
 
   // Reload when wallet changes
   useEffect(() => {
-    loadContributions(walletId);
-  }, [walletId, loadContributions]);
+    if (!walletId) {
+      setContributions([]);
+      setInitialResult(null);
+      setIsLoadingHistory(false);
+      return;
+    }
+    loadData(walletId);
+  }, [walletId, loadData]);
+
+  if (!walletId) {
+    return (
+      <div className="flex items-center justify-center h-32 text-gray-400">
+        Selecione uma carteira para ver os aportes
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -73,7 +102,7 @@ export function AportesTab({
         key={`calc-${walletId}-${defaultContribution}`}
         initialResult={initialResult}
         defaultContribution={defaultContribution}
-        onCalculate={onCalculate}
+        onCalculate={handleCalculate}
         initialError={initialError}
       />
 

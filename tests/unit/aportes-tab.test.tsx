@@ -20,6 +20,19 @@ vi.mock('../../src/lib/nexus/contributions.js', () => ({
   getContributions: (...args: [string]) => mockGetContributions(...args),
 }));
 
+// ── Mock wallet-data rebalance + supabase ──────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockGetRebalance = vi.fn<(...args: any[]) => Promise<{ data: RebalanceResult | null; error: null }>>();
+
+vi.mock('../../src/lib/dashboard/wallet-data.js', () => ({
+  getWalletRebalanceRecommendations: (...args: unknown[]) => mockGetRebalance(...args),
+}));
+
+vi.mock('../../src/lib/supabase.js', () => ({
+  getAnonClient: () => ({}),
+}));
+
 // ── Fixtures ───────────────────────────────────────────────
 
 const WALLET_A = 'wallet-a';
@@ -156,6 +169,8 @@ function makeRebalanceResult(contribution: number): RebalanceResult {
 
 beforeEach(() => {
   mockGetContributions.mockReset();
+  mockGetRebalance.mockReset();
+  mockGetRebalance.mockResolvedValue({ data: null, error: null });
 });
 
 afterEach(() => {
@@ -172,8 +187,7 @@ describe('AportesTab — input pre-fill', () => {
     render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={null}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
@@ -193,8 +207,7 @@ describe('AportesTab — input pre-fill', () => {
     render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={null}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
@@ -211,13 +224,12 @@ describe('AportesTab — calculation result', () => {
   it('T15.2.3 — shows L1→L2→L3 result after calculation', async () => {
     mockGetContributions.mockResolvedValue([]);
     const result = makeRebalanceResult(10000);
-    const onCalculate = vi.fn().mockResolvedValue(result);
+    mockGetRebalance.mockResolvedValue({ data: result, error: null });
 
     render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={result}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
@@ -225,7 +237,7 @@ describe('AportesTab — calculation result', () => {
       // L1: type names visible
       expect(screen.getByText('Ações BR')).toBeInTheDocument();
       expect(screen.getByText('FIIs')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     // L2: group names visible
     expect(screen.getByText('Large Caps')).toBeInTheDocument();
@@ -239,20 +251,19 @@ describe('AportesTab — weight mode indicator', () => {
   it('T15.2.4 — shows weight mode indicator per asset: (manual) or (questionário)', async () => {
     mockGetContributions.mockResolvedValue([]);
     const result = makeRebalanceResult(10000);
-    const onCalculate = vi.fn().mockResolvedValue(result);
+    mockGetRebalance.mockResolvedValue({ data: result, error: null });
 
     render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={result}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
     // Wait for the results to render (L1 types are visible by default)
     await waitFor(() => {
       expect(screen.getByText('Ações BR')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
 
     // Expand L2 group buttons (collapsed by default, aria-expanded="false")
     const collapsedButtons = screen.getAllByRole('button', { expanded: false });
@@ -319,8 +330,7 @@ describe('AportesTab — wallet switch', () => {
     const { rerender } = render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={null}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
@@ -333,8 +343,7 @@ describe('AportesTab — wallet switch', () => {
     rerender(
       <AportesTab
         walletId={WALLET_B}
-        initialResult={null}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 
@@ -364,8 +373,7 @@ describe('AportesTab — structure', () => {
     render(
       <AportesTab
         walletId={WALLET_A}
-        initialResult={null}
-        onCalculate={onCalculate}
+        userId="user-1"
       />,
     );
 

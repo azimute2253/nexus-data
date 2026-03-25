@@ -66,7 +66,15 @@ export { getFeatureFlag } from './lib/feature-flags/client';
 export * from './lib/dashboard/types';
 export * from './lib/dashboard/data';
 export * from './lib/dashboard/allocation-utils';
-export * from './lib/dashboard/calculator-utils';
+// Re-export calculator-utils excluding formatBrl (already exported from allocation-utils)
+export {
+  isValidContribution,
+  parseContribution,
+  formatShares,
+  countBuyOrders,
+  flattenBuyOrders,
+  countAllocatedTypes,
+} from './lib/dashboard/calculator-utils';
 export * from './lib/dashboard/refresh';
 export * from './lib/dashboard/wallet-data';
 
