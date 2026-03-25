@@ -1,0 +1,1 @@
+{"version":3,"file":"TargetWarning.d.ts","sourceRoot":"","sources":["../../../src/components/nexus/TargetWarning.tsx"],"names":[],"mappings":"AAOA,MAAM,WAAW,kBAAkB;IACjC,wCAAwC;IACxC,GAAG,EAAE,MAAM,CAAC;IACZ,4EAA4E;IAC5E,KAAK,EAAE,MAAM,CAAC;IACd,mGAAmG;IACnG,WAAW,CAAC,EAAE,MAAM,CAAC;CACtB;AAED,wBAAgB,aAAa,CAAC,EAAE,GAAG,EAAE,KAAK,EAAE,WAAe,EAAE,EAAE,kBAAkB,kDA6BhF"}

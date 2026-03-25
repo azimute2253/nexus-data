@@ -1,0 +1,80 @@
+// ============================================================
+// Nexus Data — Supabase Client
+// Shared Supabase project with azimute-blog (same credentials).
+// ============================================================
+import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+// --------------- environment helpers ---------------
+function requireEnv(name) {
+    const value = (typeof process !== 'undefined' && process.env) ? process.env[name] : undefined;
+    if (!value) {
+        throw new Error(`Missing environment variable: ${name}`);
+    }
+    return value;
+}
+// --------------- explicit init (browser) ---------------
+let _initUrl = null;
+let _initKey = null;
+/**
+ * Initialize Supabase credentials for browser usage.
+ * Call before any getAnonClient() in browser context.
+ */
+export function initSupabase(url, anonKey) {
+    _initUrl = url.trim();
+    _initKey = anonKey.trim();
+    // Reset cached client so next getAnonClient() uses new credentials
+    _anonClient = null;
+}
+// --------------- server client (service role) ---------------
+let _serverClient = null;
+/**
+ * Returns a Supabase client authenticated with the **service role** key.
+ * Use for server-side operations (Edge Functions, migrations, scripts).
+ *
+ * ⚠️  NEVER expose this client or key to the browser.
+ */
+export function getServiceClient() {
+    if (!_serverClient) {
+        _serverClient = createClient(requireEnv("PUBLIC_SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
+    }
+    return _serverClient;
+}
+// --------------- anon client (browser-safe) ---------------
+let _anonClient = null;
+/**
+ * Returns a Supabase client authenticated with the **anon** key.
+ * Browser: uses @supabase/ssr createBrowserClient to read auth cookies.
+ * Node/SSR: plain createClient with process.env.
+ */
+export function getAnonClient() {
+    if (!_anonClient) {
+        const url = _initUrl || requireEnv("PUBLIC_SUPABASE_URL");
+        const key = _initKey || requireEnv("PUBLIC_SUPABASE_ANON_KEY");
+        if (typeof window !== 'undefined') {
+            _anonClient = createBrowserClient(url, key);
+        }
+        else {
+            _anonClient = createClient(url, key);
+        }
+    }
+    return _anonClient;
+}
+// --------------- auth helpers ---------------
+/**
+ * Checks the current session via the anon client.
+ * Returns the session object or null if not authenticated.
+ */
+export async function getSession() {
+    const client = getAnonClient();
+    const { data, error } = await client.auth.getSession();
+    if (error)
+        throw error;
+    return data.session;
+}
+/**
+ * Returns the current user from the session, or null.
+ */
+export async function getCurrentUser() {
+    const session = await getSession();
+    return session?.user ?? null;
+}
