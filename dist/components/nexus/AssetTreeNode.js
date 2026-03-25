@@ -27,7 +27,6 @@ export function ClassNode({ assetType, isExpanded, onToggle, onUpdate, onDelete,
     const [form, setForm] = useState({
         name: assetType.name,
         target_pct: String(assetType.target_pct ?? ''),
-        sort_order: String(assetType.sort_order ?? ''),
     });
     const [isSaving, setIsSaving] = useState(false);
     const handleSave = useCallback(async () => {
@@ -38,7 +37,6 @@ export function ClassNode({ assetType, isExpanded, onToggle, onUpdate, onDelete,
             await onUpdate(assetType.id, {
                 name: form.name.trim(),
                 target_pct: form.target_pct ? Number(form.target_pct) : null,
-                sort_order: form.sort_order ? Number(form.sort_order) : null,
             });
             setIsEditing(false);
         }
@@ -50,12 +48,11 @@ export function ClassNode({ assetType, isExpanded, onToggle, onUpdate, onDelete,
         setForm({
             name: assetType.name,
             target_pct: String(assetType.target_pct ?? ''),
-            sort_order: String(assetType.sort_order ?? ''),
         });
         setIsEditing(false);
     }, [assetType]);
     if (isEditing) {
-        return (_jsx("div", { className: "rounded-md border border-blue-200 bg-blue-50 p-2", "data-testid": "class-edit-form", children: _jsxs(FormRow, { children: [_jsx(FormField, { label: "Nome", className: "flex-1 min-w-[120px]", children: _jsx("input", { className: INPUT_BASE, value: form.name, onChange: (e) => setForm({ ...form, name: e.target.value }), autoFocus: true }) }), _jsx(FormField, { label: "Target %", className: "w-20", children: _jsx("input", { className: INPUT_BASE, type: "number", min: 0, max: 100, value: form.target_pct, onChange: (e) => setForm({ ...form, target_pct: e.target.value }) }) }), _jsx(FormField, { label: "Ordem", className: "w-16", children: _jsx("input", { className: INPUT_BASE, type: "number", value: form.sort_order, onChange: (e) => setForm({ ...form, sort_order: e.target.value }) }) }), _jsxs("div", { className: "flex gap-1 pt-3", children: [_jsx("button", { type: "button", onClick: handleSave, disabled: isSaving || !form.name.trim(), className: "rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:bg-gray-300", children: isSaving ? 'Salvando...' : 'Salvar' }), _jsx("button", { type: "button", onClick: handleCancel, className: "rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50", children: "Cancelar" })] })] }) }));
+        return (_jsx("div", { className: "rounded-md border border-blue-200 bg-blue-50 p-2", "data-testid": "class-edit-form", children: _jsxs(FormRow, { children: [_jsx(FormField, { label: "Nome", className: "flex-1 min-w-[120px]", children: _jsx("input", { className: INPUT_BASE, value: form.name, onChange: (e) => setForm({ ...form, name: e.target.value }), autoFocus: true }) }), _jsx(FormField, { label: "Target %", className: "w-20", children: _jsx("input", { className: INPUT_BASE, type: "number", min: 0, max: 100, value: form.target_pct, onChange: (e) => setForm({ ...form, target_pct: e.target.value }) }) }), _jsxs("div", { className: "flex gap-1 pt-3", children: [_jsx("button", { type: "button", onClick: handleSave, disabled: isSaving || !form.name.trim(), className: "rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:bg-gray-300", children: isSaving ? 'Salvando...' : 'Salvar' }), _jsx("button", { type: "button", onClick: handleCancel, className: "rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50", children: "Cancelar" })] })] }) }));
     }
     return (_jsxs("div", { "data-testid": "class-node", children: [_jsxs("div", { className: "flex items-center gap-2 py-1.5", children: [_jsx("button", { type: "button", onClick: onToggle, className: "flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100", "aria-label": isExpanded ? 'Recolher' : 'Expandir', "aria-expanded": isExpanded, children: _jsx("svg", { className: `h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-90' : ''}`, viewBox: "0 0 20 20", fill: "currentColor", children: _jsx("path", { fillRule: "evenodd", d: "M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z", clipRule: "evenodd" }) }) }), _jsx("span", { className: "font-semibold text-sm text-gray-900", children: assetType.name }), assetType.target_pct !== null && (_jsxs("span", { className: "text-xs text-gray-500", children: ["(Target: ", assetType.target_pct, "%)"] })), _jsxs("div", { className: "ml-auto flex gap-1", children: [_jsx("button", { type: "button", onClick: () => setIsEditing(true), className: "text-xs text-blue-600 hover:text-blue-800", "data-testid": "class-edit-btn", children: "[editar]" }), _jsx("button", { type: "button", onClick: () => onDelete(assetType.id), className: "text-xs text-red-600 hover:text-red-800", "data-testid": "class-delete-btn", children: "[excluir]" })] })] }), isExpanded && _jsx("div", { className: "ml-5 border-l border-gray-200 pl-3", children: children })] }));
 }
@@ -102,7 +99,7 @@ export function AssetNode({ asset, onEdit, onDelete }) {
     return (_jsxs("div", { className: "flex items-center gap-2 py-1 text-sm", "data-testid": "asset-node", children: [_jsx("span", { className: "font-mono font-medium text-gray-900", children: asset.ticker }), asset.name && _jsxs("span", { className: "text-gray-500 hidden md:inline", children: ["(", asset.name, ")"] }), _jsxs("span", { className: "text-xs text-gray-500", "data-testid": "asset-weight-display", children: ["peso: ", weight, " (", modeLabel, ")"] }), !asset.is_active && (_jsx("span", { className: "rounded bg-gray-200 px-1 text-xs text-gray-600", children: "inativo" })), _jsxs("div", { className: "ml-auto flex gap-1", children: [_jsx("button", { type: "button", onClick: () => onEdit(asset), className: "text-xs text-blue-600 hover:text-blue-800", "data-testid": "asset-edit-btn", children: "[editar]" }), _jsx("button", { type: "button", onClick: () => onDelete(asset.id), className: "text-xs text-red-600 hover:text-red-800", "data-testid": "asset-delete-btn", children: "[excluir]" })] })] }));
 }
 export function CreateClassForm({ walletId, userId, onCreate, onCancel }) {
-    const [form, setForm] = useState({ name: '', target_pct: '', sort_order: '' });
+    const [form, setForm] = useState({ name: '', target_pct: '' });
     const [isSaving, setIsSaving] = useState(false);
     const handleSubmit = useCallback(async () => {
         if (!form.name.trim())
@@ -112,7 +109,7 @@ export function CreateClassForm({ walletId, userId, onCreate, onCancel }) {
             await onCreate({
                 name: form.name.trim(),
                 target_pct: form.target_pct ? Number(form.target_pct) : null,
-                sort_order: form.sort_order ? Number(form.sort_order) : null,
+                sort_order: null,
                 user_id: userId,
                 wallet_id: walletId,
             });
@@ -121,7 +118,7 @@ export function CreateClassForm({ walletId, userId, onCreate, onCancel }) {
             setIsSaving(false);
         }
     }, [form, walletId, userId, onCreate]);
-    return (_jsx("div", { className: "rounded-md border border-green-200 bg-green-50 p-2", "data-testid": "create-class-form", children: _jsxs(FormRow, { children: [_jsx(FormField, { label: "Nome *", className: "flex-1 min-w-[120px]", children: _jsx("input", { className: INPUT_BASE, value: form.name, onChange: (e) => setForm({ ...form, name: e.target.value }), placeholder: "Nome da classe", autoFocus: true }) }), _jsx(FormField, { label: "Target %", className: "w-20", children: _jsx("input", { className: INPUT_BASE, type: "number", min: 0, max: 100, value: form.target_pct, onChange: (e) => setForm({ ...form, target_pct: e.target.value }) }) }), _jsx(FormField, { label: "Ordem", className: "w-16", children: _jsx("input", { className: INPUT_BASE, type: "number", value: form.sort_order, onChange: (e) => setForm({ ...form, sort_order: e.target.value }) }) }), _jsxs("div", { className: "flex gap-1 pt-3", children: [_jsx("button", { type: "button", onClick: handleSubmit, disabled: isSaving || !form.name.trim(), className: "rounded bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:bg-gray-300", children: isSaving ? 'Criando...' : 'Criar' }), _jsx("button", { type: "button", onClick: onCancel, className: "rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50", children: "Cancelar" })] })] }) }));
+    return (_jsx("div", { className: "rounded-md border border-green-200 bg-green-50 p-2", "data-testid": "create-class-form", children: _jsxs(FormRow, { children: [_jsx(FormField, { label: "Nome *", className: "flex-1 min-w-[120px]", children: _jsx("input", { className: INPUT_BASE, value: form.name, onChange: (e) => setForm({ ...form, name: e.target.value }), placeholder: "Nome da classe", autoFocus: true }) }), _jsx(FormField, { label: "Target %", className: "w-20", children: _jsx("input", { className: INPUT_BASE, type: "number", min: 0, max: 100, value: form.target_pct, onChange: (e) => setForm({ ...form, target_pct: e.target.value }) }) }), _jsxs("div", { className: "flex gap-1 pt-3", children: [_jsx("button", { type: "button", onClick: handleSubmit, disabled: isSaving || !form.name.trim(), className: "rounded bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:bg-gray-300", children: isSaving ? 'Criando...' : 'Criar' }), _jsx("button", { type: "button", onClick: onCancel, className: "rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50", children: "Cancelar" })] })] }) }));
 }
 export function CreateGroupForm({ typeId, walletId, userId, onCreate, onCancel }) {
     const [form, setForm] = useState({ name: '', target_pct: '', scoring_method: 'manual' });

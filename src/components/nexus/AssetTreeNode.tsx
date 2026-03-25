@@ -35,7 +35,6 @@ const PRICE_SOURCES: { value: PriceSource; label: string }[] = [
 interface ClassFormData {
   name: string;
   target_pct: string;
-  sort_order: string;
 }
 
 interface GroupFormData {
@@ -106,7 +105,6 @@ export function ClassNode({
   const [form, setForm] = useState<ClassFormData>({
     name: assetType.name,
     target_pct: String(assetType.target_pct ?? ''),
-    sort_order: String(assetType.sort_order ?? ''),
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -117,7 +115,6 @@ export function ClassNode({
       await onUpdate(assetType.id, {
         name: form.name.trim(),
         target_pct: form.target_pct ? Number(form.target_pct) : null,
-        sort_order: form.sort_order ? Number(form.sort_order) : null,
       });
       setIsEditing(false);
     } finally {
@@ -129,7 +126,6 @@ export function ClassNode({
     setForm({
       name: assetType.name,
       target_pct: String(assetType.target_pct ?? ''),
-      sort_order: String(assetType.sort_order ?? ''),
     });
     setIsEditing(false);
   }, [assetType]);
@@ -154,14 +150,6 @@ export function ClassNode({
               max={100}
               value={form.target_pct}
               onChange={(e) => setForm({ ...form, target_pct: e.target.value })}
-            />
-          </FormField>
-          <FormField label="Ordem" className="w-16">
-            <input
-              className={INPUT_BASE}
-              type="number"
-              value={form.sort_order}
-              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
             />
           </FormField>
           <div className="flex gap-1 pt-3">
@@ -438,7 +426,7 @@ export interface CreateClassFormProps {
 }
 
 export function CreateClassForm({ walletId, userId, onCreate, onCancel }: CreateClassFormProps) {
-  const [form, setForm] = useState<ClassFormData>({ name: '', target_pct: '', sort_order: '' });
+  const [form, setForm] = useState<ClassFormData>({ name: '', target_pct: '' });
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = useCallback(async () => {
@@ -448,7 +436,7 @@ export function CreateClassForm({ walletId, userId, onCreate, onCancel }: Create
       await onCreate({
         name: form.name.trim(),
         target_pct: form.target_pct ? Number(form.target_pct) : null,
-        sort_order: form.sort_order ? Number(form.sort_order) : null,
+        sort_order: null,
         user_id: userId,
         wallet_id: walletId,
       });
@@ -477,14 +465,6 @@ export function CreateClassForm({ walletId, userId, onCreate, onCancel }: Create
             max={100}
             value={form.target_pct}
             onChange={(e) => setForm({ ...form, target_pct: e.target.value })}
-          />
-        </FormField>
-        <FormField label="Ordem" className="w-16">
-          <input
-            className={INPUT_BASE}
-            type="number"
-            value={form.sort_order}
-            onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
           />
         </FormField>
         <div className="flex gap-1 pt-3">
